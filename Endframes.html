@@ -1,12 +1,434 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Frame Extractor</title>
+    <title>Video Last Frame Extractor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 14px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .preview-container {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .preview-container.active {
+            display: block;
+        }
+
+        .video-info {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .video-info-icon {
+            font-size: 32px;
+        }
+
+        .video-info-text {
+            flex: 1;
+        }
+
+        .video-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+
+        .video-details {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .frame-preview {
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .frame-preview img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f2ff;
+            color: #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #e8ebff;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden-canvas {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                min-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Video Frame Extractor</h1>
-    <p>This page will allow users to extract frames from a video.</p>
+    <div class="container">
+        <h1>🎬 Video Frame Extractor</h1>
+        <p class="subtitle">Extrahiere das letzte Bild aus deinem Video</p>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📹</div>
+            <div class="upload-text">Video hochladen</div>
+            <div class="upload-hint">Klicken oder Video hierher ziehen (MP4, MOV, WebM, etc.)</div>
+        </div>
+
+        <input type="file" id="fileInput" accept="video/*">
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Video wird verarbeitet...</div>
+        </div>
+
+        <div class="preview-container" id="previewContainer">
+            <div class="video-info">
+                <div class="video-info-icon">🎥</div>
+                <div class="video-info-text">
+                    <div class="video-name" id="videoName"></div>
+                    <div class="video-details" id="videoDetails"></div>
+                </div>
+            </div>
+
+            <div class="frame-preview">
+                <img id="frameImage" alt="Letztes Frame">
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" id="saveBtn">
+                    💾 Speichern
+                </button>
+                <button class="btn-primary" id="saveAsBtn">
+                    📁 Speichern unter...
+                </button>
+                <button class="btn-secondary" id="newVideoBtn">
+                    🔄 Neues Video
+                </button>
+            </div>
+        </div>
+
+        <video class="hidden-canvas" id="videoElement"></video>
+        <canvas class="hidden-canvas" id="canvas"></canvas>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const loading = document.getElementById('loading');
+        const previewContainer = document.getElementById('previewContainer');
+        const videoElement = document.getElementById('videoElement');
+        const canvas = document.getElementById('canvas');
+        const frameImage = document.getElementById('frameImage');
+        const videoName = document.getElementById('videoName');
+        const videoDetails = document.getElementById('videoDetails');
+        const saveBtn = document.getElementById('saveBtn');
+        const saveAsBtn = document.getElementById('saveAsBtn');
+        const newVideoBtn = document.getElementById('newVideoBtn');
+
+        let currentVideoFile = null;
+        let extractedFrameBlob = null;
+        let extractedFrameFilename = '';
+
+        // Upload area click
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Handle file
+        function handleFile(file) {
+            if (!file.type.startsWith('video/')) {
+                alert('Bitte wähle eine Video-Datei aus!');
+                return;
+            }
+
+            currentVideoFile = file;
+            loading.classList.add('active');
+            previewContainer.classList.remove('active');
+
+            const url = URL.createObjectURL(file);
+            videoElement.src = url;
+
+            videoElement.addEventListener('loadedmetadata', () => {
+                extractLastFrame();
+            }, { once: true });
+        }
+
+        // Extract last frame
+        function extractLastFrame() {
+            const duration = videoElement.duration;
+            
+            // Set video to last frame (slightly before end to ensure we get a valid frame)
+            videoElement.currentTime = duration - 0.1;
+
+            videoElement.addEventListener('seeked', () => {
+                // Set canvas size to video dimensions
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+
+                // Draw video frame to canvas
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+                // Convert canvas to blob
+                canvas.toBlob((blob) => {
+                    extractedFrameBlob = blob;
+                    const imageUrl = URL.createObjectURL(blob);
+                    frameImage.src = imageUrl;
+
+                    // Generate filename
+                    const originalName = currentVideoFile.name.replace(/\.[^/.]+$/, '');
+                    extractedFrameFilename = `${originalName}_last_frame.png`;
+
+                    // Update UI
+                    videoName.textContent = currentVideoFile.name;
+                    const sizeInMB = (currentVideoFile.size / (1024 * 1024)).toFixed(2);
+                    const durationFormatted = formatDuration(duration);
+                    videoDetails.textContent = `Größe: ${sizeInMB} MB | Dauer: ${durationFormatted} | Auflösung: ${canvas.width}x${canvas.height}`;
+
+                    loading.classList.remove('active');
+                    previewContainer.classList.add('active');
+                }, 'image/png');
+
+            }, { once: true });
+        }
+
+        // Format duration
+        function formatDuration(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Save button (simple download)
+        saveBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(extractedFrameBlob);
+            link.download = extractedFrameFilename;
+            link.click();
+        });
+
+        // Save As button (triggers browser's save dialog)
+        saveAsBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(extractedFrameBlob);
+            link.download = extractedFrameFilename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // New video button
+        newVideoBtn.addEventListener('click', () => {
+            currentVideoFile = null;
+            extractedFrameBlob = null;
+            extractedFrameFilename = '';
+            fileInput.value = '';
+            videoElement.src = '';
+            previewContainer.classList.remove('active');
+        });
+    </script>
 </body>
 </html>
