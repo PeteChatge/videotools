@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Frame Extractor</title>
+</head>
+<body>
+    <h1>Video Frame Extractor</h1>
+    <p>Select a video file to extract frames:</p>
+    <input type="file" id="videoInput" accept="video/*">
+    <button id="extractBtn">Extract Frames</button>
+    <div id="framesContainer"></div>
+
+    <script>
+        document.getElementById('extractBtn').addEventListener('click', function() {
+            const videoInput = document.getElementById('videoInput');
+            const framesContainer = document.getElementById('framesContainer');
+            framesContainer.innerHTML = '';
+
+            if (videoInput.files.length > 0) {
+                const videoFile = videoInput.files[0];
+                const videoURL = URL.createObjectURL(videoFile);
+                const video = document.createElement('video');
+                video.src = videoURL;
+
+                video.addEventListener('loadeddata', function() {
+                    video.currentTime = 1;
+                });
+
+                video.addEventListener('seeked', function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    const context = canvas.getContext('2d');
+                    context.drawImage(video, 0, 0);
+                    const img = document.createElement('img');
+                    img.src = canvas.toDataURL();
+                    framesContainer.appendChild(img);
+                });
+
+                video.play();
+            } else {
+                alert('Please select a video file.');
+            }
+        });
+    </script>
+</body>
+</html>
