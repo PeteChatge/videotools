@@ -764,8 +764,8 @@ async function loadFFmpeg() {
             // optional: console.log('[ffmpeg]', message);
         });
 
-        // Core laden – toBlobURL setzt nötige COOP/COEP-Header für SharedArrayBuffer
-        const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+        // Core laden – UMD-Pfad (kein /dist/esm in diesem Paket verfügbar)
+        const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
         await ffmpeg.load({
             coreURL: await toBlobURL(baseURL + '/ffmpeg-core.js',   'text/javascript'),
             wasmURL: await toBlobURL(baseURL + '/ffmpeg-core.wasm', 'application/wasm'),
