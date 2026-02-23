@@ -1,0 +1,267 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: http://127.0.0.1:26499/main/0/storage/emulated/0/Download/videoframextractor-1.html
+Subject: Video Frame Extractor
+Date: Mon, 23 Feb 2026 18:14:33 +0100
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--4KiaRiVQoPMgsN5xa5OAYouSNkHX8irBuwpuD0AduT----"
+
+
+------MultipartBoundary--4KiaRiVQoPMgsN5xa5OAYouSNkHX8irBuwpuD0AduT----
+Content-Type: text/html
+Content-ID: <frame-3EA998F62221EEC620B1A01C7359E7CC@mhtml.blink>
+Content-Transfer-Encoding: binary
+Content-Location: http://127.0.0.1:26499/main/0/storage/emulated/0/Download/videoframextractor-1.html
+
+<!DOCTYPE html><html lang="de"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><link rel="stylesheet" type="text/css" href="cid:css-76c2d6b5-10d1-4c38-b144-440312222e34@mhtml.blink" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Frame Extractor</title>
+    
+</head>
+<body>
+
+<div class="header">
+    <h1>► FRAME EXTRACTOR</h1>
+    <p>Batch · Intervalle · ZIP — 100% lokal · alle Browser</p>
+</div>
+
+<div class="container">
+
+    <div class="info-banner">
+        <span class="ib-icon">ℹ️</span>
+        <div class="ib-text">
+            <strong>Trimm-Skripte werden automatisch mit in die ZIP gepackt.</strong><br>
+            1) <strong>Android:</strong> Termux (aus F-Droid installieren) → <code>pkg install ffmpeg</code> → Skript aus ZIP ausführen.<br>
+            2) <strong>Windows/Mac:</strong> trim-Skript aus der ZIP in den Clip-Ordner legen und ausführen.
+        </div>
+    </div>
+
+    <div class="upload-area" id="uploadArea">
+        <span class="icon">📁</span>
+        <div class="title">Videos hierher ziehen oder klicken</div>
+        <div class="hint">Bis zu 10 Videos gleichzeitig · MP4, MOV, WebM, AVI, MKV</div>
+    </div>
+    <input type="file" id="fileInput" accept="video/*" multiple="">
+
+    <div class="panel">
+        <div class="panel-label">Frame-Intervall</div>
+        <div class="interval-row">
+            <div class="ibt active" data-v="5">Jedes 5.</div>
+            <div class="ibt" data-v="10">Jedes 10.</div>
+            <div class="ibt" data-v="15">Jedes 15.</div>
+            <div class="ibt" data-v="20">Jedes 20.</div>
+            <div class="ibt" data-v="25">Jedes 25.</div>
+            <div class="ibt" data-v="last">Nur Letztes</div>
+        </div>
+        <div class="toggle-row">
+            <div class="toggle-label">
+                Original-Clip mit in ZIP packen
+                <span class="toggle-sub">Dateiname: clip_HHMMSS.mp4 · Endframe: clip_HHMMSS.png</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="includeClipToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="file-list" id="fileList">
+        <div class="fl-header">
+            <span>Warteschlange</span>
+            <span class="badge" id="fileCount">0 Videos</span>
+        </div>
+        <div id="fileItems"></div>
+    </div>
+
+    <div class="action-row">
+        <button class="btn btn-primary" id="startBtn" disabled="">⚡ Verarbeitung starten</button>
+        <button class="btn btn-ghost" id="resetBtn">✕ Zurücksetzen</button>
+    </div>
+
+    <div class="progress-panel" id="progressPanel">
+        <div class="prog-top">
+            <span id="progLabel">Verarbeite...</span>
+            <span id="progPct">0%</span>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+        <div class="prog-detail" id="progDetail"></div>
+    </div>
+
+    <div class="summary" id="summary">
+        <div class="s-icon">✅</div>
+        <h2>Fertig!</h2>
+        <p id="summaryText"></p>
+        <button class="btn btn-dl" id="dlBtn" style="max-width:280px;margin:0 auto;">📦 ZIP herunterladen</button>
+    </div>
+
+</div>
+
+<canvas id="canvas"></canvas>
+
+
+
+
+</body></html>
+------MultipartBoundary--4KiaRiVQoPMgsN5xa5OAYouSNkHX8irBuwpuD0AduT----
+Content-Type: text/css
+Content-Transfer-Encoding: binary
+Content-Location: cid:css-76c2d6b5-10d1-4c38-b144-440312222e34@mhtml.blink
+
+@charset "utf-8";
+
+:root { --bg: #0f0f13; --surface: #18181f; --surface2: #22222c; --border: #2e2e3d; --accent: #7c6af7; --accent2: #f76a8a; --text: #e8e8f0; --muted: #7070a0; --success: #4ade80; --warning: #fbbf24; }
+
+* { margin: 0px; padding: 0px; box-sizing: border-box; }
+
+body { font-family: "Segoe UI", system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+
+body::before { content: ""; position: fixed; top: -200px; left: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(124, 106, 247, 0.1) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+
+.header { text-align: center; margin-bottom: 36px; position: relative; z-index: 1; }
+
+.header h1 { font-size: 28px; font-weight: 700; letter-spacing: 2px; background-image: ; background-position-x: ; background-position-y: ; background-size: ; background-repeat: ; background-attachment: ; background-origin: ; background-color: ; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 6px; }
+
+.header p { color: var(--muted); font-size: 13px; }
+
+.container { width: 100%; max-width: 820px; display: flex; flex-direction: column; gap: 18px; position: relative; z-index: 1; }
+
+.info-banner { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px 22px; display: flex; align-items: flex-start; gap: 12px; font-size: 13px; }
+
+.info-banner .ib-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+.info-banner .ib-text { flex: 1 1 0%; color: var(--muted); line-height: 1.6; }
+
+.info-banner strong { color: var(--text); }
+
+.upload-area { border: 2px dashed var(--border); border-radius: 16px; padding: 48px 40px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s, transform 0.2s; background: var(--surface); }
+
+.upload-area:hover, .upload-area.drag { border-color: var(--accent); background: rgb(28, 28, 40); transform: translateY(-1px); }
+
+.upload-area .icon { font-size: 48px; display: block; margin-bottom: 12px; }
+
+.upload-area .title { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+
+.upload-area .hint { color: var(--muted); font-size: 13px; }
+
+#fileInput { display: none; }
+
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; }
+
+.panel-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+
+.interval-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.ibt { flex: 1 1 0%; min-width: 70px; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface2); color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.18s; text-align: center; user-select: none; }
+
+.ibt:hover { border-color: var(--accent); color: var(--text); }
+
+.ibt.active { border-color: var(--accent); background: rgba(124, 106, 247, 0.15); color: var(--accent); }
+
+.toggle-row { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
+
+.toggle-label { font-size: 13px; color: var(--text); flex: 1 1 0%; }
+
+.toggle-sub { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
+
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+
+.switch input { opacity: 0; width: 0px; height: 0px; }
+
+.slider { position: absolute; cursor: pointer; inset: 0px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 24px; transition: 0.25s; }
+
+.slider::before { content: ""; position: absolute; width: 16px; height: 16px; border-radius: 50%; left: 3px; bottom: 3px; background: var(--muted); transition: 0.25s; }
+
+input:checked + .slider { background: rgba(124, 106, 247, 0.25); border-color: var(--accent); }
+
+input:checked + .slider::before { transform: translateX(20px); background: var(--accent); }
+
+.file-list { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; display: none; }
+
+.file-list.show { display: block; }
+
+.fl-header { padding: 14px 22px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+.badge { background: rgba(124, 106, 247, 0.18); color: var(--accent); padding: 3px 10px; border-radius: 20px; font-size: 12px; letter-spacing: 0px; }
+
+.fi { display: flex; align-items: center; padding: 13px 22px; border-bottom: 1px solid var(--border); gap: 12px; }
+
+.fi:last-child { border-bottom: none; }
+
+.fi-icon { font-size: 22px; flex-shrink: 0; }
+
+.fi-info { flex: 1 1 0%; min-width: 0px; }
+
+.fi-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.fi-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.tag { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+
+.tag-wait { background: rgba(112, 112, 160, 0.2); color: var(--muted); }
+
+.tag-proc { background: rgba(251, 191, 36, 0.2); color: var(--warning); }
+
+.tag-done { background: rgba(74, 222, 128, 0.2); color: var(--success); }
+
+.tag-err { background: rgba(247, 106, 138, 0.2); color: var(--accent2); }
+
+.fi-frames { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+
+.rm-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 4px 6px; border-radius: 4px; line-height: 1; transition: color 0.15s; }
+
+.rm-btn:hover { color: var(--accent2); }
+
+.action-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.btn { flex: 1 1 0%; min-width: 140px; padding: 14px 24px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn:disabled:hover { transform: none !important; box-shadow: none !important; }
+
+.btn-primary { background: linear-gradient(135deg, rgb(124, 106, 247), rgb(90, 79, 212)); color: rgb(255, 255, 255); box-shadow: rgba(124, 106, 247, 0.3) 0px 4px 18px; }
+
+.btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: rgba(124, 106, 247, 0.4) 0px 8px 28px; }
+
+.btn-dl { background: linear-gradient(135deg, rgb(247, 106, 138), rgb(196, 68, 101)); color: rgb(255, 255, 255); box-shadow: rgba(247, 106, 138, 0.3) 0px 4px 18px; }
+
+.btn-dl:hover:not(:disabled) { transform: translateY(-2px); box-shadow: rgba(247, 106, 138, 0.4) 0px 8px 28px; }
+
+.btn-ghost { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+.btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--accent); }
+
+.progress-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; display: none; }
+
+.progress-panel.show { display: block; }
+
+.prog-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; }
+
+.prog-top span:last-child { color: var(--accent); font-weight: 700; }
+
+.prog-bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px; transition: width 0.3s; width: 0%; }
+
+.prog-detail { font-size: 12px; color: var(--muted); margin-top: 8px; min-height: 18px; }
+
+.summary { background: var(--surface); border: 1px solid var(--success); border-radius: 16px; padding: 30px 24px; text-align: center; display: none; }
+
+.summary.show { display: block; }
+
+.summary .s-icon { font-size: 44px; margin-bottom: 10px; }
+
+.summary h2 { font-size: 20px; font-weight: 700; color: var(--success); margin-bottom: 6px; }
+
+.summary p { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+
+canvas { display: none; }
+
+@media (max-width: 580px) {
+  .action-row { flex-direction: column; }
+  .btn { min-width: 100%; }
+  .upload-area { padding: 32px 20px; }
+}
+------MultipartBoundary--4KiaRiVQoPMgsN5xa5OAYouSNkHX8irBuwpuD0AduT------

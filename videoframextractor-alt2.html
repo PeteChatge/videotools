@@ -64,16 +64,6 @@
         .ibt:hover { border-color: var(--accent); color: var(--text); }
         .ibt.active { border-color: var(--accent); background: rgba(124,106,247,0.15); color: var(--accent); }
 
-        .toggle-row { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
-        .toggle-label { font-size: 13px; color: var(--text); flex: 1; }
-        .toggle-sub { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
-        .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; inset: 0; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 24px; transition: 0.25s; }
-        .slider::before { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; left: 3px; bottom: 3px; background: var(--muted); transition: 0.25s; }
-        input:checked + .slider { background: rgba(124,106,247,0.25); border-color: var(--accent); }
-        input:checked + .slider::before { transform: translateX(20px); background: var(--accent); }
-
         .file-list { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; display: none; }
         .file-list.show { display: block; }
         .fl-header { padding: 14px 22px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
@@ -156,16 +146,6 @@
             <div class="ibt" data-v="20">Jedes 20.</div>
             <div class="ibt" data-v="25">Jedes 25.</div>
             <div class="ibt" data-v="last">Nur Letztes</div>
-        </div>
-        <div class="toggle-row">
-            <div class="toggle-label">
-                Original-Clip mit in ZIP packen
-                <span class="toggle-sub">Dateiname: clip_HHMMSS.mp4 &middot; Endframe: clip_HHMMSS.png</span>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="includeClipToggle">
-                <span class="slider"></span>
-            </label>
         </div>
     </div>
 
@@ -254,40 +234,15 @@ const enc = new TextEncoder();
 const TRIM_MAC = enc.encode(
 `#!/bin/bash
 # trim_mac.sh - Ersten Frame aller Videoclips entfernen
-# Mac/Linux : chmod +x trim_mac.sh && ./trim_mac.sh
-# Android   : bash /sdcard/Download/trimmen/trim_mac.sh /sdcard/Download/CLIP-ORDNER
-#
-# Auf Android/Termux: Clips werden im angegebenen Ordner verarbeitet,
-# Ergebnisse landen im selben Ordner. Kein manuelles Kopieren noetig.
+# Benoetigt: FFmpeg (brew install ffmpeg  oder  https://ffmpeg.org)
+# Ausfuehren: chmod +x trim_mac.sh && ./trim_mac.sh
 
-CLIP_DIR="\${1:-\$(pwd)}"
-
-if [ -d "/data/data/com.termux" ] || [ -n "\$TERMUX_VERSION" ]; then
-    WORK_DIR="\$HOME/trim_work"
-    mkdir -p "\$WORK_DIR"
-    echo "Android/Termux erkannt."
-    echo "Clips: \$CLIP_DIR"
-    echo ""
-    for f in "\$CLIP_DIR"/*.mp4 "\$CLIP_DIR"/*.mov "\$CLIP_DIR"/*.webm "\$CLIP_DIR"/*.mkv "\$CLIP_DIR"/*.avi; do
-        [ -f "\$f" ] || continue
-        BASENAME="\$(basename "\$f")"
-        OUTNAME="\${BASENAME%.*}_trimmed.mp4"
-        echo "Verarbeite: \$BASENAME"
-        ffmpeg -ss 0.034 -i "\$f" -c copy "\$WORK_DIR/\$OUTNAME" -y 2>/dev/null
-        cp "\$WORK_DIR/\$OUTNAME" "\$CLIP_DIR/\$OUTNAME"
-        rm "\$WORK_DIR/\$OUTNAME"
-        echo "Fertig: \$OUTNAME"
-    done
-    rmdir "\$WORK_DIR" 2>/dev/null
-else
-    for f in "\$CLIP_DIR"/*.mp4 "\$CLIP_DIR"/*.mov "\$CLIP_DIR"/*.webm "\$CLIP_DIR"/*.mkv "\$CLIP_DIR"/*.avi; do
-        [ -f "\$f" ] || continue
-        OUTNAME="\${f%.*}_trimmed.mp4"
-        ffmpeg -ss 0.034 -i "\$f" -c copy "\$OUTNAME" -y
-        echo "Fertig: \$OUTNAME"
-    done
-fi
-echo ""
+for f in *.mp4 *.mov *.webm *.mkv *.avi; do
+    [ -f "$f" ] || continue
+    out="\${f%.*}_trimmed.mp4"
+    ffmpeg -ss 0.034 -i "$f" -c copy "$out" -y
+    echo "Fertig: $out"
+done
 echo "Alle Clips wurden getrimmt."
 `);
 
@@ -327,7 +282,6 @@ VERWENDUNG
 1. Skript in denselben Ordner wie die Original-Clips kopieren
 2. Ausfuehren:
      Mac/Linux : chmod +x trim_mac.sh  dann  ./trim_mac.sh
-     Android   : bash /sdcard/Download/trimmen/trim_mac.sh /sdcard/Download/CLIP-ORDNER
      Windows   : Doppelklick auf trim_windows.bat
 
 ERGEBNIS
@@ -342,15 +296,6 @@ Die Originaldateien bleiben unveraendert.
 let videoFiles = [];
 let interval   = 5;
 let zipBlob    = null;
-
-const includeClipToggle = document.getElementById('includeClipToggle');
-
-function timeStamp() {
-    const n = new Date();
-    return String(n.getHours()).padStart(2,'0') +
-           String(n.getMinutes()).padStart(2,'0') +
-           String(n.getSeconds()).padStart(2,'0');
-}
 
 const uploadArea    = document.getElementById('uploadArea');
 const fileInput     = document.getElementById('fileInput');
@@ -456,25 +401,9 @@ startBtn.addEventListener('click', async () => {
 
         try {
             const baseName = entry.file.name.replace(/\.[^/.]+$/, '');
-            const ts = timeStamp();
             const frames = await extractFrames(entry.file, interval, msg => { progDetail.textContent = msg; });
             frames.forEach(f => allFiles.push({ name: baseName + '/frames/' + f.name, data: f.data }));
             totalFrames += frames.length;
-
-            // Original-Clip + Endframe optional beilegen
-            if (includeClipToggle.checked) {
-                progDetail.textContent = 'Original-Clip wird gepackt ...';
-                const clipData = await entry.file.arrayBuffer();
-                const ext = entry.file.name.split('.').pop() || 'mp4';
-                allFiles.push({ name: baseName + '/clip_' + ts + '.' + ext, data: new Uint8Array(clipData) });
-
-                // Letztes Frame als PNG
-                const lastFrame = await extractSingleFrame(entry.file, 'last');
-                if (lastFrame) {
-                    allFiles.push({ name: baseName + '/clip_' + ts + '.png', data: lastFrame });
-                }
-            }
-
             entry.status = 'done';
             entry.frames = frames.length;
         } catch (err) {
@@ -563,36 +492,6 @@ function extractFrames(file, iv, onProgress) {
 
         video.src = url;
         video.load();
-    });
-}
-
-// Letztes Frame als PNG extrahieren
-function extractSingleFrame(file, pos) {
-    return new Promise((resolve) => {
-        const url   = URL.createObjectURL(file);
-        const video = document.createElement('video');
-        video.muted = true; video.preload = 'auto';
-        video.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
-        video.addEventListener('loadedmetadata', async () => {
-            const t = pos === 'last' ? Math.max(0, video.duration - 0.05) : pos;
-            const c = document.createElement('canvas');
-            c.width = video.videoWidth || 1280;
-            c.height = video.videoHeight || 720;
-            try {
-                await new Promise((res, rej) => {
-                    const tid = setTimeout(() => rej(), 10000);
-                    video.onseeked = () => { clearTimeout(tid); res(); };
-                    video.currentTime = t;
-                });
-                c.getContext('2d').drawImage(video, 0, 0, c.width, c.height);
-                const blob = await new Promise(res => c.toBlob(res, 'image/png'));
-                const arr  = await blob.arrayBuffer();
-                resolve(new Uint8Array(arr));
-            } catch(e) { resolve(null); }
-            URL.revokeObjectURL(url);
-            video.remove();
-        });
-        video.src = url; video.load();
     });
 }
 
