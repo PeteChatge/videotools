@@ -79,10 +79,7 @@
   .option-info { flex: 1; }
   .option-titel { font-weight: 700; font-size: .95rem; color: var(--brown); }
   .option-meta  { font-size: .75rem; color: var(--brown-lt); margin-top: 3px; line-height: 1.5; }
-  .option-preis {
-    font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700;
-    color: var(--terra); white-space: nowrap; align-self: center;
-  }
+  .option-preis { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--terra); white-space: nowrap; align-self: center; }
   .start-btn {
     display: block; width: 100%; margin-top: 24px; padding: 14px;
     background: var(--terra); color: var(--cream); border: 2px solid var(--brown); box-shadow: var(--shadow);
@@ -126,49 +123,48 @@
   .artikel { margin-bottom: 28px; }
   .artikel-frame { border: var(--frame); box-shadow: var(--shadow); overflow: hidden; background: var(--brown); }
 
-  /* ── MEDIA-CONTAINER ────────────────────── */
-  /*
-    data-drive = Google Drive Datei-ID
-    data-yt = Vimeo Video-ID
-    data-ratio = r-1-1 | r-4-3 | r-3-4 | r-5-3 | r-3-5
+  /* ── BILD (kein Clip) ───────────────────── */
+  .bild-container { position: relative; overflow: hidden; display: block; background: #1e0e04; }
+  .bild-container img { display: block; width: 100%; height: auto; }
 
-    Bild-URL:  https://drive.google.com/uc?export=view&id=IHRE_ID
-    Video:     Vimeo-iframe, wird beim Antippen eingesetzt
-  */
-  .media-container { position: relative; cursor: pointer; overflow: hidden; display: block; background: #1e0e04; }
-  .media-container img { display: block; width: 100%; height: auto; }
+  /* ── VIDEO-CONTAINER ────────────────────── */
+  .video-container { position: relative; cursor: pointer; overflow: hidden; display: block; background: #1e0e04; }
+  .video-container img { display: block; width: 100%; height: auto; transition: opacity .2s; }
 
-  /* Vimeo-Wrapper – versteckt bis Clip läuft */
-  .vimeo-wrap { display: none; position: relative; width: 100%; }
-  .vimeo-wrap.r-1-1 { padding-bottom: 100%; }
-  .vimeo-wrap.r-4-3 { padding-bottom: 75%; }
-  .vimeo-wrap.r-3-4 { padding-bottom: 133.33%; }
-  .vimeo-wrap.r-5-3 { padding-bottom: 60%; }
-  .vimeo-wrap.r-3-5 { padding-bottom: 166.66%; }
-  .vimeo-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+  .embed-wrap { display: none; position: relative; width: 100%; }
+  .embed-wrap.r-1-1 { padding-bottom: 100%; }
+  .embed-wrap.r-4-3 { padding-bottom: 75%; }
+  .embed-wrap.r-3-4 { padding-bottom: 133.33%; }
+  .embed-wrap.r-5-3 { padding-bottom: 60%; }
+  .embed-wrap.r-3-5 { padding-bottom: 166.66%; }
+  .embed-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
-  /* Clip läuft */
-  .media-container.playing img         { display: none; }
-  .media-container.playing .vimeo-wrap { display: block; }
-  .media-container.playing .play-overlay { opacity: 0; pointer-events: none; }
-  .media-container.playing .stop-badge  { display: block; }
+  .video-container.playing img       { display: none; }
+  .video-container.playing .embed-wrap { display: block; }
+  .video-container.playing .play-overlay { opacity: 0; pointer-events: none; }
+  .video-container.playing .stop-badge  { display: block; }
 
-  /* Play-Overlay */
   .play-overlay {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
     background: rgba(74,44,20,.22); transition: opacity .2s;
   }
   .play-btn-circle {
-    width: 52px; height: 52px; border-radius: 50%;
+    width: 56px; height: 56px; border-radius: 50%;
     background: var(--terra); border: 3px solid var(--cream);
     display: flex; align-items: center; justify-content: center;
     box-shadow: 2px 2px 0 var(--brown); transition: transform .15s;
   }
-  .play-btn-circle svg { fill: var(--cream); width: 20px; height: 20px; margin-left: 4px; }
-  .media-container:hover .play-btn-circle { transform: scale(1.1); }
+  .play-btn-circle svg { fill: var(--cream); width: 22px; height: 22px; margin-left: 4px; }
+  .video-container:hover .play-btn-circle { transform: scale(1.1); }
 
-  /* Stop-Badge */
+  /* Video-Badge */
+  .video-badge {
+    position: absolute; top: 8px; left: 8px;
+    background: var(--terra); color: var(--cream);
+    font-family: 'Special Elite', cursive; font-size: .6rem; letter-spacing: .12em;
+    padding: 3px 8px; border: 1.5px solid var(--cream);
+  }
   .stop-badge {
     display: none; position: absolute; top: 8px; right: 8px;
     background: var(--terra-dk); color: var(--cream);
@@ -222,7 +218,7 @@
 
 <!-- ══════════ STARTSEITE ══════════ -->
 <div id="startseite">
-  <div class="titel-band">Bildwerk Verlag · Ausgabe 2024</div>
+  <div class="titel-band">Bildwerk Verlag · Ausgabe 2025</div>
   <div class="titel-hauptwort">BILD<br>WERK</div>
   <div class="titel-untertitel">Fotografie &amp; Bewegtbild · Katalog Nr. 1</div>
 
@@ -231,7 +227,7 @@
       <input type="radio" name="modus" value="lesen" checked>
       <div class="option-info">
         <div class="option-titel">Nur lesen &amp; ansehen</div>
-        <div class="option-meta">Freier Zugang · Clips starten auf Antippen · Vimeo-Player</div>
+        <div class="option-meta">Freier Zugang · Clips starten auf Antippen · Vorschau-Qualität</div>
       </div>
       <div class="option-preis">€ 0,–</div>
     </label>
@@ -252,7 +248,7 @@
       <div class="option-preis">€ 49,–</div>
     </label>
     <button class="start-btn" onclick="starteKatalog()">▶ &nbsp; Katalog aufschlagen</button>
-    <div class="impressum">Eigenes Material · Alle Rechte vorbehalten · BILDWERK 2024<br>Zahlungsabwicklung über sichere Bezahlrouten</div>
+    <div class="impressum">Eigenes Material · Alle Rechte vorbehalten · BILDWERK 2025<br>Zahlungsabwicklung über sichere Bezahlrouten</div>
   </div>
 </div>
 
@@ -262,102 +258,57 @@
   <header class="katalog-header">
     <div class="logo">BILDWERK</div>
     <nav>
-      <a onclick="zeigeSeite(0)">I – Licht</a>
-      <a onclick="zeigeSeite(1)">II – Zeit</a>
-      <a onclick="zeigeSeite(2)">III – Raum</a>
       <a onclick="toggleWarenkorb()">Warenkorb <span class="warenkorb-badge" id="wk-count">0</span></a>
     </nav>
   </header>
 
-  <!-- ═══ DOPPELSEITE 1 ═══ -->
-  <div class="doppelseite" id="doppelseite-0">
+  <!-- ═══ DOPPELSEITE – 4 Items ═══ -->
+  <div class="doppelseite">
     <div class="buch-ruecken"></div>
 
+    <!-- LINKE SEITE: Bild 1 + Bild 2 -->
     <div class="seite">
       <div class="kapitel-kopf">
         <div class="kapitel-nr">I</div>
-        <div class="kapitel-titel">Licht &amp; Stille</div>
+        <div class="kapitel-titel">Bilder &amp; Clips</div>
       </div>
 
-      <!-- ┌─────────────────────────────────────────────────────┐
-           │  SO BEFÜLLEN SIE EINEN ARTIKEL:                    │
-           │                                                     │
-           │  1. Google Drive: Datei freigeben →                │
-           │     „Jeder mit dem Link" → Link kopieren           │
-           │     Link: …/file/d/ABCD1234xyz/view?…              │
-           │     Ihre ID: ABCD1234xyz  ← das eintragen         │
-           │                                                     │
-           │  2. Vimeo: Video hochladen →                        │
-           │     Link: youtube.com/watch?v=dQw4w9WgXcQ           │
-           │     Ihre ID: dQw4w9WgXcQ  ← das eintragen         │
-           │                                                     │
-           │  3. data-ratio passend zum Format wählen:          │
-           │     1:1 → r-1-1    4:3 → r-4-3    3:4 → r-3-4    │
-           │     5:3 → r-5-3    3:5 → r-3-5                    │
-           └─────────────────────────────────────────────────────┘ -->
-
-      <!-- Artikel 1 · Format 1:1 -->
+      <!-- Item 1 · BILD · frame1_202602 · Format 4:3 -->
       <div class="artikel">
         <div class="artikel-frame">
-          <div class="media-container"
-               data-drive="IHRE_DRIVE_ID"
-               data-yt="PCgMKgsGH2I"
-               data-ratio="r-1-1"
-               onclick="toggleClip(this)">
-            <img src="https://img.youtube.com/vi/PCgMKgsGH2I/maxresdefault.jpg"
-                 alt="Goldstunde, Fensterfront"
-                 style="aspect-ratio:1/1; object-fit:cover;">
-            <div class="vimeo-wrap r-1-1"></div>
-            <div class="play-overlay">
-              <div class="play-btn-circle"><svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg></div>
-            </div>
-            <div class="stop-badge" onclick="event.stopPropagation(); stoppeClip(this.parentElement)">■ STOP</div>
+          <div class="bild-container">
+            <img src="https://archive.org/services/img/frame1_202602"
+                 alt="Frame 1"
+                 style="aspect-ratio:4/3; object-fit:cover;">
           </div>
           <div class="artikel-info">
             <div class="artikel-kopfzeile">
-              <div class="artikel-titel">Goldstunde, Fensterfront</div>
+              <div class="artikel-titel">Frame 1</div>
               <div class="artikel-preis">€ 12,–</div>
             </div>
-            <div class="artikel-meta">Format: 1:1 · 4096×4096 px · Clip: 32 s · 24 fps</div>
-            <div class="artikel-text">Diffuses Morgenlicht bricht durch Milchglas. Staub bewegt sich. Stille als sichtbares Phänomen.</div>
-            <div class="loop-row">
-              <input type="checkbox" class="loop-check" id="loop-1" onchange="aktualisiereLoop(this)">
-              <label class="loop-label" for="loop-1">Clip wiederholen</label>
-            </div>
-            <button class="bestell-btn" onclick="inWarenkorb(this,'Goldstunde, Fensterfront','€ 12,–')">In den Warenkorb</button>
+            <div class="artikel-meta">Fotografie · Format 4:3 · Hohe Auflösung</div>
+            <div class="artikel-text">Standbild. Ihr Text hier.</div>
+            <button class="bestell-btn" onclick="inWarenkorb(this,'Frame 1','€ 12,–')">In den Warenkorb</button>
           </div>
         </div>
       </div>
 
-      <!-- Artikel 2 · Format 3:4 -->
+      <!-- Item 2 · BILD · frame2_202602 · Format 4:3 -->
       <div class="artikel">
         <div class="artikel-frame">
-          <div class="media-container"
-               data-drive="1WDwHlYaG9qi027kkqs9RYeIc1_62_q-k"
-               data-yt="PCgMKgsGH2I"
-               data-ratio="r-3-4"
-               onclick="toggleClip(this)">
-            <img src="https://img.youtube.com/vi/PCgMKgsGH2I/maxresdefault.jpg"
-                 alt="Waldrand, November"
-                 style="aspect-ratio:3/4; object-fit:cover;">
-            <div class="vimeo-wrap r-3-4"></div>
-            <div class="play-overlay">
-              <div class="play-btn-circle"><svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg></div>
-            </div>
-            <div class="stop-badge" onclick="event.stopPropagation(); stoppeClip(this.parentElement)">■ STOP</div>
+          <div class="bild-container">
+            <img src="https://archive.org/services/img/frame2_202602"
+                 alt="Frame 2"
+                 style="aspect-ratio:4/3; object-fit:cover;">
           </div>
           <div class="artikel-info">
             <div class="artikel-kopfzeile">
-              <div class="artikel-titel">Waldrand, November</div>
+              <div class="artikel-titel">Frame 2</div>
               <div class="artikel-preis">€ 12,–</div>
             </div>
-            <div class="artikel-meta">Format: 3:4 · 3072×4096 px · Clip: 48 s · 25 fps</div>
-            <div class="artikel-text">Nebel sitzt im Unterholz. Kein Wind. Das Bild wartet.</div>
-            <div class="loop-row">
-              <input type="checkbox" class="loop-check" id="loop-2" onchange="aktualisiereLoop(this)">
-              <label class="loop-label" for="loop-2">Clip wiederholen</label>
-            </div>
-            <button class="bestell-btn" onclick="inWarenkorb(this,'Waldrand, November','€ 12,–')">In den Warenkorb</button>
+            <div class="artikel-meta">Fotografie · Format 4:3 · Hohe Auflösung</div>
+            <div class="artikel-text">Standbild. Ihr Text hier.</div>
+            <button class="bestell-btn" onclick="inWarenkorb(this,'Frame 2','€ 12,–')">In den Warenkorb</button>
           </div>
         </div>
       </div>
@@ -365,74 +316,62 @@
       <div class="seiten-nr">Seite 2</div>
     </div>
 
+    <!-- RECHTE SEITE: Bild 3 + Video -->
     <div class="seite">
       <div class="kapitel-kopf" style="flex-direction:row-reverse; justify-content:flex-start;">
         <div class="kapitel-nr" style="color:var(--terra-dk)">I</div>
         <div class="kapitel-titel">Fortsetzung</div>
       </div>
 
-      <!-- Artikel 3 · Format 4:3 -->
+      <!-- Item 3 · BILD · frame3_202602 · Format 4:3 -->
       <div class="artikel">
         <div class="artikel-frame">
-          <div class="media-container"
-               data-drive="IHRE_DRIVE_ID"
-               data-yt="PCgMKgsGH2I"
-               data-ratio="r-4-3"
-               onclick="toggleClip(this)">
-            <img src="https://img.youtube.com/vi/PCgMKgsGH2I/maxresdefault.jpg"
-                 alt="Seespiegelung"
+          <div class="bild-container">
+            <img src="https://archive.org/services/img/frame3_202602"
+                 alt="Frame 3"
                  style="aspect-ratio:4/3; object-fit:cover;">
-            <div class="vimeo-wrap r-4-3"></div>
-            <div class="play-overlay">
-              <div class="play-btn-circle"><svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg></div>
-            </div>
-            <div class="stop-badge" onclick="event.stopPropagation(); stoppeClip(this.parentElement)">■ STOP</div>
           </div>
           <div class="artikel-info">
             <div class="artikel-kopfzeile">
-              <div class="artikel-titel">Seespiegelung, 6:42 Uhr</div>
+              <div class="artikel-titel">Frame 3</div>
               <div class="artikel-preis">€ 12,–</div>
             </div>
-            <div class="artikel-meta">Format: 4:3 · 4096×3072 px · Clip: 1 min 12 s · 25 fps</div>
-            <div class="artikel-text">Das Wasser lügt. Es zeigt den Himmel deutlicher als der Himmel selbst.</div>
-            <div class="loop-row">
-              <input type="checkbox" class="loop-check" id="loop-3" onchange="aktualisiereLoop(this)">
-              <label class="loop-label" for="loop-3">Clip wiederholen</label>
-            </div>
-            <button class="bestell-btn" onclick="inWarenkorb(this,'Seespiegelung, 6:42 Uhr','€ 12,–')">In den Warenkorb</button>
+            <div class="artikel-meta">Fotografie · Format 4:3 · Hohe Auflösung</div>
+            <div class="artikel-text">Standbild. Ihr Text hier.</div>
+            <button class="bestell-btn" onclick="inWarenkorb(this,'Frame 3','€ 12,–')">In den Warenkorb</button>
           </div>
         </div>
       </div>
 
-      <!-- Artikel 4 · Format 5:3 -->
+      <!-- Item 4 · VIDEO · female_first · Format 4:3 -->
       <div class="artikel">
         <div class="artikel-frame">
-          <div class="media-container"
-               data-drive="IHRE_DRIVE_ID"
-               data-yt="PCgMKgsGH2I"
-               data-ratio="r-5-3"
+          <div class="video-container"
+               data-archive="female_first"
+               data-ratio="r-4-3"
                onclick="toggleClip(this)">
-            <img src="https://img.youtube.com/vi/PCgMKgsGH2I/maxresdefault.jpg"
-                 alt="Kornfeld Panorama"
-                 style="aspect-ratio:5/3; object-fit:cover;">
-            <div class="vimeo-wrap r-5-3"></div>
+            <img src="https://archive.org/services/img/female_first"
+                 alt="A Female Hammer Thrower in Love"
+                 style="aspect-ratio:4/3; object-fit:cover;">
+            <div class="embed-wrap r-4-3"></div>
             <div class="play-overlay">
               <div class="play-btn-circle"><svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg></div>
             </div>
+            <div class="video-badge">▶ VIDEO</div>
             <div class="stop-badge" onclick="event.stopPropagation(); stoppeClip(this.parentElement)">■ STOP</div>
           </div>
           <div class="artikel-info">
             <div class="artikel-kopfzeile">
-              <div class="artikel-titel">Kornfeld Panorama</div>
+              <div class="artikel-titel">A Female Hammer Thrower in Love</div>
               <div class="artikel-preis">€ 12,–</div>
             </div>
-            <div class="artikel-meta">Format: 5:3 · 5120×3072 px · Clip: 55 s · 25 fps</div>
-            <div class="artikel-text">Wind geht durchs Korn. Links nach rechts, einmal, ohne Eile.</div>
+            <div class="artikel-meta">Bewegtbild · Format 4:3 · 0:20 min</div>
+            <div class="artikel-text">Antippen zum Abspielen.</div>
             <div class="loop-row">
-              <input type="checkbox" class="loop-check" id="loop-4" onchange="aktualisiereLoop(this)">
-              <label class="loop-label" for="loop-4">Clip wiederholen</label>
+              <input type="checkbox" class="loop-check" id="loop-v1" onchange="aktualisiereLoop(this)">
+              <label class="loop-label" for="loop-v1">Clip wiederholen</label>
             </div>
-            <button class="bestell-btn" onclick="inWarenkorb(this,'Kornfeld Panorama','€ 12,–')">In den Warenkorb</button>
+            <button class="bestell-btn" onclick="inWarenkorb(this,'A Female Hammer Thrower in Love','€ 12,–')">In den Warenkorb</button>
           </div>
         </div>
       </div>
@@ -441,164 +380,23 @@
     </div>
   </div>
 
-
-  <!-- ═══ DOPPELSEITE 2 ═══ -->
-  <div class="doppelseite" id="doppelseite-1" style="display:none">
-    <div class="buch-ruecken"></div>
-    <div class="seite">
-      <div class="kapitel-kopf">
-        <div class="kapitel-nr">II</div>
-        <div class="kapitel-titel">Zeit &amp; Bewegung</div>
-      </div>
-      <div class="artikel">
-        <div class="artikel-frame">
-          <div class="media-container" data-drive="IHRE_DRIVE_ID" data-yt="PCgMKgsGH2I" data-ratio="r-3-4" onclick="toggleClip(this)">
-            <img src="https://img.youtube.com/vi/PCgMKgsGH2I/maxresdefault.jpg" alt="Hochhaus, Regen" style="aspect-ratio:3/4; object-fit:cover;">
-            <div class="vimeo-wrap r-3-4"></div>
-            <div class="play-overlay"><div class="play-btn-circle"><svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg></div></div>
-            <div class="stop-badge" onclick="event.stopPropagation(); stoppeClip(this.parentElement)">■ STOP</div>
-          </div>
-          <div class="artikel-info">
-            <div class="artikel-kopfzeile"><div class="artikel-titel">Hochhaus, Regen</div><div class="artikel-preis">€ 12,–</div></div>
-            <div class="artikel-meta">Format: 3:4 · 3072×4096 px · Clip: 28 s · 24 fps</div>
-            <div class="artikel-text">Tropfen zeichnen diagonale Bahnen auf Glas. Die Stadt dahinter: unscharf, gleichgültig.</div>
-            <div class="loop-row"><input type="checkbox" class="loop-check" id="loop-5" onchange="aktualisiereLoop(this)"><label class="loop-label" for="loop-5">Clip wiederholen</label></div>
-            <button class="bestell-btn" onclick="inWarenkorb(this,'Hochhaus, Regen','€ 12,–')">In den Warenkorb</button>
-          </div>
-        </div>
-      </div>
-      <div class="seiten-nr">Seite 4</div>
-    </div>
-    <div class="seite">
-      <div class="kapitel-kopf" style="flex-direction:row-reverse; justify-content:flex-start;">
-        <div class="kapitel-nr" style="color:var(--terra-dk)">II</div>
-        <div class="kapitel-titel">Fortsetzung</div>
-      </div>
-      <div class="artikel">
-        <div class="artikel-frame">
-          <div class="media-container" data-drive="IHRE_DRIVE_ID" data-yt="PCgMKgsGH2I" data-ratio="r-5-3" onclick="toggleClip(this)">
-            <img src="https://img.youtube.com/vi/PCgMKgsGH2I/maxresdefault.jpg" alt="Bahnhof, Abfahrt" style="aspect-ratio:5/3; object-fit:cover;">
-            <div class="vimeo-wrap r-5-3"></div>
-            <div class="play-overlay"><div class="play-btn-circle"><svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg></div></div>
-            <div class="stop-badge" onclick="event.stopPropagation(); stoppeClip(this.parentElement)">■ STOP</div>
-          </div>
-          <div class="artikel-info">
-            <div class="artikel-kopfzeile"><div class="artikel-titel">Bahnhof, Abfahrt</div><div class="artikel-preis">€ 12,–</div></div>
-            <div class="artikel-meta">Format: 5:3 · 5120×3072 px · Clip: 41 s · 25 fps</div>
-            <div class="artikel-text">Zug fährt aus. Bahnsteig bleibt. Dampf zieht westlich.</div>
-            <div class="loop-row"><input type="checkbox" class="loop-check" id="loop-6" onchange="aktualisiereLoop(this)"><label class="loop-label" for="loop-6">Clip wiederholen</label></div>
-            <button class="bestell-btn" onclick="inWarenkorb(this,'Bahnhof, Abfahrt','€ 12,–')">In den Warenkorb</button>
-          </div>
-        </div>
-      </div>
-      <div class="seiten-nr" style="right:28px">Seite 5</div>
-    </div>
-  </div>
-
-
-  <!-- ═══ DOPPELSEITE 3 ═══ -->
-  <div class="doppelseite" id="doppelseite-2" style="display:none">
-    <div class="buch-ruecken"></div>
-    <div class="seite">
-      <div class="kapitel-kopf">
-        <div class="kapitel-nr">III</div>
-        <div class="kapitel-titel">Raum &amp; Architektur</div>
-      </div>
-      <div class="artikel">
-        <div class="artikel-frame">
-          <div class="media-container" data-drive="IHRE_DRIVE_ID" data-yt="PCgMKgsGH2I" data-ratio="r-1-1" onclick="toggleClip(this)">
-            <img src="https://img.youtube.com/vi/PCgMKgsGH2I/maxresdefault.jpg" alt="Treppenhaus" style="aspect-ratio:1/1; object-fit:cover;">
-            <div class="vimeo-wrap r-1-1"></div>
-            <div class="play-overlay"><div class="play-btn-circle"><svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg></div></div>
-            <div class="stop-badge" onclick="event.stopPropagation(); stoppeClip(this.parentElement)">■ STOP</div>
-          </div>
-          <div class="artikel-info">
-            <div class="artikel-kopfzeile"><div class="artikel-titel">Treppenhaus, oben</div><div class="artikel-preis">€ 12,–</div></div>
-            <div class="artikel-meta">Format: 1:1 · 4096×4096 px · Clip: 22 s · 24 fps</div>
-            <div class="artikel-text">Spirale aus Beton. Licht fällt von oben, warum auch nicht.</div>
-            <div class="loop-row"><input type="checkbox" class="loop-check" id="loop-7" onchange="aktualisiereLoop(this)"><label class="loop-label" for="loop-7">Clip wiederholen</label></div>
-            <button class="bestell-btn" onclick="inWarenkorb(this,'Treppenhaus, oben','€ 12,–')">In den Warenkorb</button>
-          </div>
-        </div>
-      </div>
-      <div class="seiten-nr">Seite 6</div>
-    </div>
-    <div class="seite">
-      <div class="kapitel-kopf" style="flex-direction:row-reverse; justify-content:flex-start;">
-        <div class="kapitel-nr" style="color:var(--terra-dk)">III</div>
-        <div class="kapitel-titel">Fortsetzung</div>
-      </div>
-      <div class="artikel">
-        <div class="artikel-frame">
-          <div class="media-container" data-drive="IHRE_DRIVE_ID" data-yt="PCgMKgsGH2I" data-ratio="r-3-5" onclick="toggleClip(this)">
-            <img src="https://img.youtube.com/vi/PCgMKgsGH2I/maxresdefault.jpg" alt="Gasse" style="aspect-ratio:3/5; object-fit:cover;">
-            <div class="vimeo-wrap r-3-5"></div>
-            <div class="play-overlay"><div class="play-btn-circle"><svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg></div></div>
-            <div class="stop-badge" onclick="event.stopPropagation(); stoppeClip(this.parentElement)">■ STOP</div>
-          </div>
-          <div class="artikel-info">
-            <div class="artikel-kopfzeile"><div class="artikel-titel">Gasse, Südeuropa</div><div class="artikel-preis">€ 12,–</div></div>
-            <div class="artikel-meta">Format: 3:5 · 3072×5120 px · Clip: 36 s · 25 fps</div>
-            <div class="artikel-text">Enge. Wände fast greifbar. Unten eine Katze, die nicht wartet.</div>
-            <div class="loop-row"><input type="checkbox" class="loop-check" id="loop-8" onchange="aktualisiereLoop(this)"><label class="loop-label" for="loop-8">Clip wiederholen</label></div>
-            <button class="bestell-btn" onclick="inWarenkorb(this,'Gasse, Südeuropa','€ 12,–')">In den Warenkorb</button>
-          </div>
-        </div>
-      </div>
-      <div class="seiten-nr" style="right:28px">Seite 7</div>
-    </div>
-  </div>
-
 </div><!-- /katalog -->
 
 
 <script>
-/* ══════════════════════════════════════════════
-   START & NAVIGATION
-══════════════════════════════════════════════ */
-let aktiveSeite = 0;
-let warenkorb   = [];
+/* ── START ───────────────────────────────── */
+let warenkorb = [];
 
 function starteKatalog() {
   const checked = document.querySelector('input[name="modus"]:checked');
   if (checked && checked.value !== 'lesen') document.body.classList.add('bestell-modus');
   document.getElementById('startseite').style.display = 'none';
   document.getElementById('katalog').style.display    = 'block';
-  zeigeSeite(0);
 }
 
-function zeigeSeite(nr) {
-  document.querySelectorAll('.doppelseite').forEach((d, i) => {
-    d.style.display = (i === nr) ? 'grid' : 'none';
-  });
-  document.querySelectorAll('.media-container.playing').forEach(stoppeClip);
-  aktiveSeite = nr;
-}
-
-/* ══════════════════════════════════════════════
-   CLIP-LOGIK: YouTube „Nicht gelistet"
-
-   YouTube-URL-Parameter erklärt:
-     autoplay=1        → startet automatisch
-     mute=1            → stummgeschaltet (Pflicht für autoplay)
-     loop=1            → Schleife an
-     playlist=ID       → wird für loop=1 benötigt (gleiche ID!)
-     rel=0             → keine „ähnliche Videos" am Ende
-     modestbranding=1  → weniger YouTube-Logo
-     controls=1        → Steuerleiste sichtbar
-
-   YouTube „Nicht gelistet" einrichten:
-     Video hochladen → Details → Sichtbarkeit:
-     „Nicht gelistet" wählen → niemand findet es
-     per Suche, aber iframe-Einbettung klappt.
-
-   ID aus dem Link kopieren:
-     youtube.com/watch?v=PCgMKgsGH2I
-                          ↑↑↑↑↑↑↑↑↑↑↑  das ist die ID
-══════════════════════════════════════════════ */
-function youtubeURL(id, loop) {
-  const l = loop ? `&loop=1&playlist=${id}` : '';
-  return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1${l}&rel=0&modestbranding=1&controls=1`;
+/* ── CLIP-LOGIK (archive.org) ────────────── */
+function archiveURL(id) {
+  return `https://archive.org/embed/${id}?autoplay=1&start=0`;
 }
 
 function toggleClip(container) {
@@ -606,24 +404,15 @@ function toggleClip(container) {
     stoppeClip(container);
     return;
   }
+  // Andere laufende Clips stoppen
+  document.querySelectorAll('.video-container.playing').forEach(stoppeClip);
 
-  // Andere laufende Clips auf der gleichen Seite stoppen
-  container.closest('.doppelseite')
-    .querySelectorAll('.media-container.playing')
-    .forEach(stoppeClip);
-
-  const ytId = container.dataset.yt;
-  if (!ytId || ytId === 'TOb3kYZaLn4') {
-    zeigeToast('YouTube-ID noch nicht eingetragen – Clip startet in der Vollversion.');
-    return;
-  }
-
-  const loopBox = container.closest('.artikel').querySelector('.loop-check');
-  const wrap    = container.querySelector('.vimeo-wrap');
+  const archiveId = container.dataset.archive;
+  const wrap      = container.querySelector('.embed-wrap');
 
   const iframe = document.createElement('iframe');
-  iframe.src = youtubeURL(ytId, loopBox && loopBox.checked);
-  iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+  iframe.src = archiveURL(archiveId);
+  iframe.allow = 'autoplay; fullscreen';
   iframe.allowFullscreen = true;
   wrap.innerHTML = '';
   wrap.appendChild(iframe);
@@ -631,21 +420,24 @@ function toggleClip(container) {
 }
 
 function stoppeClip(container) {
-  container.querySelector('.vimeo-wrap').innerHTML = '';
+  container.querySelector('.embed-wrap').innerHTML = '';
   container.classList.remove('playing');
 }
 
-/* Loop-Checkbox während Clip läuft → iframe neu laden */
 function aktualisiereLoop(checkbox) {
-  const container = checkbox.closest('.artikel').querySelector('.media-container');
-  if (!container.classList.contains('playing')) return;
-  const iframe = container.querySelector('.vimeo-wrap iframe');
-  if (iframe) iframe.src = youtubeURL(container.dataset.yt, checkbox.checked);
+  // archive.org unterstützt kein Loop-Parameter – Neustart simuliert Schleife
+  const container = checkbox.closest('.artikel').querySelector('.video-container');
+  if (!container || !container.classList.contains('playing')) return;
+  if (checkbox.checked) {
+    const iframe = container.querySelector('.embed-wrap iframe');
+    if (iframe) {
+      // Beim Ende neu laden – einfachste Lösung: iframe src neu setzen
+      iframe.src = archiveURL(container.dataset.archive);
+    }
+  }
 }
 
-/* ══════════════════════════════════════════════
-   WARENKORB
-══════════════════════════════════════════════ */
+/* ── WARENKORB ───────────────────────────── */
 function inWarenkorb(btn, name, preis) {
   if (!warenkorb.find(i => i.name === name)) warenkorb.push({ name, preis });
   document.getElementById('wk-count').textContent = warenkorb.length;
@@ -659,9 +451,7 @@ function toggleWarenkorb() {
   alert('Warenkorb:\n\n' + warenkorb.map(i => `· ${i.name}  ${i.preis}`).join('\n') + '\n\n(Bezahlroutine hier einbinden)');
 }
 
-/* ══════════════════════════════════════════════
-   TOAST
-══════════════════════════════════════════════ */
+/* ── TOAST ───────────────────────────────── */
 function zeigeToast(text) {
   let t = document.getElementById('toast');
   if (!t) {
@@ -681,14 +471,9 @@ function zeigeToast(text) {
   t._t = setTimeout(() => { t.style.opacity = '0'; }, 2800);
 }
 
-/* ══════════════════════════════════════════════
-   TASTATUR
-══════════════════════════════════════════════ */
+/* ── TASTATUR: Esc = Stop ────────────────── */
 document.addEventListener('keydown', e => {
-  const n = document.querySelectorAll('.doppelseite').length;
-  if (e.key === 'ArrowRight' && aktiveSeite < n-1) zeigeSeite(aktiveSeite+1);
-  if (e.key === 'ArrowLeft'  && aktiveSeite > 0)   zeigeSeite(aktiveSeite-1);
-  if (e.key === 'Escape') document.querySelectorAll('.media-container.playing').forEach(stoppeClip);
+  if (e.key === 'Escape') document.querySelectorAll('.video-container.playing').forEach(stoppeClip);
 });
 </script>
 </body>
