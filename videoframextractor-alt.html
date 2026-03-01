@@ -167,16 +167,6 @@
                 <span class="slider"></span>
             </label>
         </div>
-        <div class="toggle-row">
-            <div class="toggle-label">
-                Ersten Frame entfernen (direkt im Browser)
-                <span class="toggle-sub" id="trimBrowserSub">Getrimmt als WebM &middot; Chrome/Android: ja &middot; Safari/iPhone: nein</span>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="trimBrowserToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
     </div>
 
     <div class="file-list" id="fileList">
@@ -353,18 +343,7 @@ let videoFiles = [];
 let interval   = 5;
 let zipBlob    = null;
 
-const includeClipToggle  = document.getElementById('includeClipToggle');
-const trimBrowserToggle  = document.getElementById('trimBrowserToggle');
-
-// MediaRecorder-Unterstützung prüfen und Toggle entsprechend anzeigen
-const canTrimInBrowser = (typeof MediaRecorder !== 'undefined' &&
-    (MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ||
-     MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ||
-     MediaRecorder.isTypeSupported('video/webm')));
-if (!canTrimInBrowser) {
-    trimBrowserToggle.disabled = true;
-    document.getElementById('trimBrowserSub').textContent = 'Nicht verfuegbar in diesem Browser (Safari/iPhone)';
-}
+const includeClipToggle = document.getElementById('includeClipToggle');
 
 function timeStamp() {
     const n = new Date();
@@ -482,15 +461,6 @@ startBtn.addEventListener('click', async () => {
             frames.forEach(f => allFiles.push({ name: baseName + '/frames/' + f.name, data: f.data }));
             totalFrames += frames.length;
 
-            // Clip im Browser trimmen (erster Frame weg → WebM)
-            if (trimBrowserToggle.checked && canTrimInBrowser) {
-                progDetail.textContent = 'Trimme Clip im Browser ...';
-                const trimmed = await trimFirstFrameBrowser(entry.file, msg => { progDetail.textContent = msg; });
-                if (trimmed) {
-                    allFiles.push({ name: baseName + '/' + baseName + '_trimmed.webm', data: trimmed });
-                }
-            }
-
             // Original-Clip + Endframe optional beilegen
             if (includeClipToggle.checked) {
                 progDetail.textContent = 'Original-Clip wird gepackt ...';
@@ -589,88 +559,6 @@ function extractFrames(file, iv, onProgress) {
             URL.revokeObjectURL(url);
             video.remove();
             resolve(results);
-        });
-
-        video.src = url;
-        video.load();
-    });
-}
-
-// Ersten Frame im Browser entfernen via MediaRecorder (Canvas-Stream)
-// Gibt WebM zurück – funktioniert in Chrome/Android, nicht in Safari
-function trimFirstFrameBrowser(file, onProgress) {
-    return new Promise((resolve) => {
-        const fps     = 30;
-        const skipSec = 1 / fps; // ~0.034s = 1 Frame
-        const url     = URL.createObjectURL(file);
-        const video   = document.createElement('video');
-        video.muted   = true;
-        video.preload = 'auto';
-        video.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
-
-        video.addEventListener('loadedmetadata', () => {
-            const duration = video.duration;
-            const W = video.videoWidth  || 1280;
-            const H = video.videoHeight || 720;
-
-            const recCanvas = document.createElement('canvas');
-            recCanvas.width = W; recCanvas.height = H;
-            const recCtx = recCanvas.getContext('2d');
-
-            const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-                ? 'video/webm;codecs=vp9'
-                : MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
-                    ? 'video/webm;codecs=vp8'
-                    : 'video/webm';
-
-            const stream   = recCanvas.captureStream(fps);
-            const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8_000_000 });
-            const chunks   = [];
-
-            recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-            recorder.onstop = async () => {
-                URL.revokeObjectURL(url);
-                video.remove(); recCanvas.remove();
-                const blob = new Blob(chunks, { type: mimeType });
-                const arr  = await blob.arrayBuffer();
-                resolve(new Uint8Array(arr));
-            };
-
-            // Auf skipSec springen, dann aufnehmen und abspielen
-            video.onseeked = () => {
-                video.onseeked = null;
-                recorder.start(100);
-
-                const totalMs = (duration - skipSec) * 1000;
-                let startTs = null;
-                let animId;
-
-                const draw = (ts) => {
-                    if (!startTs) startTs = ts;
-                    const elapsed = ts - startTs;
-                    recCtx.drawImage(video, 0, 0, W, H);
-                    if (elapsed < totalMs && !video.ended) {
-                        animId = requestAnimationFrame(draw);
-                    } else {
-                        cancelAnimationFrame(animId);
-                        if (recorder.state === 'recording') recorder.stop();
-                        video.pause();
-                    }
-                    if (Math.round(elapsed / 1000) % 2 === 0) {
-                        onProgress('Trimme: ' + Math.min(100, Math.round(elapsed / totalMs * 100)) + '%');
-                    }
-                };
-
-                video.onended = () => {
-                    cancelAnimationFrame(animId);
-                    if (recorder.state === 'recording') recorder.stop();
-                };
-
-                video.play().then(() => { animId = requestAnimationFrame(draw); })
-                    .catch(() => { recorder.stop(); resolve(null); });
-            };
-
-            video.currentTime = skipSec;
         });
 
         video.src = url;
