@@ -177,6 +177,16 @@
                 <span class="slider"></span>
             </label>
         </div>
+        <div class="toggle-row">
+            <div class="toggle-label">
+                Clip umkehren / Reverse (direkt im Browser)
+                <span class="toggle-sub" id="reverseBrowserSub">Ausgabe als WebM &middot; Chrome/Android: ja &middot; Safari/iPhone: nein</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="reverseBrowserToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
     </div>
 
     <div class="file-list" id="fileList">
@@ -346,6 +356,54 @@ Fuer jeden Clip "video.mp4" entsteht "video_trimmed.mp4".
 Die Originaldateien bleiben unveraendert.
 `);
 
+
+const REVERSE_MAC = enc.encode(
+`#!/bin/bash
+# reverse_mac.sh - Clip rueckwaerts abspielen
+# Mac/Linux : chmod +x reverse_mac.sh && ./reverse_mac.sh
+# Android   : bash /sdcard/Download/trimmen/reverse_mac.sh /sdcard/Download/CLIP-ORDNER
+
+CLIP_DIR="\${1:-\$(pwd)}"
+
+if [ -d "/data/data/com.termux" ] || [ -n "\$TERMUX_VERSION" ]; then
+    WORK_DIR="\$HOME/reverse_work"
+    mkdir -p "\$WORK_DIR"
+    echo "Android/Termux erkannt. Clips: \$CLIP_DIR"
+    for f in "\$CLIP_DIR"/*.mp4 "\$CLIP_DIR"/*.mov "\$CLIP_DIR"/*.webm "\$CLIP_DIR"/*.mkv "\$CLIP_DIR"/*.avi; do
+        [ -f "\$f" ] || continue
+        BASENAME="\$(basename "\$f")"
+        OUTNAME="\${BASENAME%.*}_reversed.mp4"
+        echo "Verarbeite: \$BASENAME"
+        ffmpeg -i "\$f" -vf reverse -af areverse "\$WORK_DIR/\$OUTNAME" -y 2>/dev/null
+        cp "\$WORK_DIR/\$OUTNAME" "\$CLIP_DIR/\$OUTNAME"
+        rm "\$WORK_DIR/\$OUTNAME"
+        echo "Fertig: \$OUTNAME"
+    done
+    rmdir "\$WORK_DIR" 2>/dev/null
+else
+    for f in "\$CLIP_DIR"/*.mp4 "\$CLIP_DIR"/*.mov "\$CLIP_DIR"/*.webm "\$CLIP_DIR"/*.mkv "\$CLIP_DIR"/*.avi; do
+        [ -f "\$f" ] || continue
+        OUTNAME="\${f%.*}_reversed.mp4"
+        ffmpeg -i "\$f" -vf reverse -af areverse "\$OUTNAME" -y
+        echo "Fertig: \$OUTNAME"
+    done
+fi
+echo "Alle Clips wurden umgekehrt."
+`);
+
+const REVERSE_WIN = enc.encode(
+`@echo off
+REM reverse_windows.bat - Clip rueckwaerts abspielen
+REM Benoetigt: FFmpeg im PATH (https://ffmpeg.org)
+
+for %%f in (*.mp4 *.mov *.webm *.mkv *.avi) do (
+    ffmpeg -i "%%f" -vf reverse -af areverse "%%~nf_reversed.mp4" -y
+    echo Fertig: %%~nf_reversed.mp4
+)
+echo Alle Clips wurden umgekehrt.
+pause
+`);
+
 // ═══════════════════════════════════════════════════════════
 // App
 // ═══════════════════════════════════════════════════════════
@@ -357,6 +415,8 @@ const includeClipToggle  = document.getElementById('includeClipToggle');
 const trimBrowserToggle  = document.getElementById('trimBrowserToggle');
 
 // MediaRecorder-Unterstützung prüfen und Toggle entsprechend anzeigen
+const reverseBrowserToggle = document.getElementById('reverseBrowserToggle');
+
 const canTrimInBrowser = (typeof MediaRecorder !== 'undefined' &&
     (MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ||
      MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ||
@@ -364,6 +424,8 @@ const canTrimInBrowser = (typeof MediaRecorder !== 'undefined' &&
 if (!canTrimInBrowser) {
     trimBrowserToggle.disabled = true;
     document.getElementById('trimBrowserSub').textContent = 'Nicht verfuegbar in diesem Browser (Safari/iPhone)';
+    reverseBrowserToggle.disabled = true;
+    document.getElementById('reverseBrowserSub').textContent = 'Nicht verfuegbar in diesem Browser (Safari/iPhone)';
 }
 
 function timeStamp() {
@@ -491,6 +553,15 @@ startBtn.addEventListener('click', async () => {
                 }
             }
 
+            // Clip umkehren (Reverse)
+            if (reverseBrowserToggle.checked && canTrimInBrowser) {
+                progDetail.textContent = 'Kehre Clip um (Reverse) ...';
+                const reversed = await reverseClipBrowser(entry.file, msg => { progDetail.textContent = msg; });
+                if (reversed) {
+                    allFiles.push({ name: baseName + '/' + baseName + '_reversed.webm', data: reversed });
+                }
+            }
+
             // Original-Clip + Endframe optional beilegen
             if (includeClipToggle.checked) {
                 progDetail.textContent = 'Original-Clip wird gepackt ...';
@@ -517,6 +588,8 @@ startBtn.addEventListener('click', async () => {
     // Trimm-Skripte immer beilegen
     allFiles.push({ name: 'trimmen/trim_mac.sh',      data: TRIM_MAC });
     allFiles.push({ name: 'trimmen/trim_windows.bat', data: TRIM_WIN });
+    allFiles.push({ name: 'trimmen/reverse_mac.sh',   data: REVERSE_MAC });
+    allFiles.push({ name: 'trimmen/reverse_windows.bat', data: REVERSE_WIN });
     allFiles.push({ name: 'trimmen/ANLEITUNG.txt',    data: TRIM_README });
 
     progLabel.textContent = 'ZIP wird erstellt ...';
@@ -671,6 +744,165 @@ function trimFirstFrameBrowser(file, onProgress) {
             };
 
             video.currentTime = skipSec;
+        });
+
+        video.src = url;
+        video.load();
+    });
+}
+
+// Clip umkehren via Canvas – alle Frames sammeln, dann rückwärts abspielen und aufnehmen
+function reverseClipBrowser(file, onProgress) {
+    return new Promise((resolve) => {
+        const fps  = 30;
+        const step = 1 / fps;
+        const url  = URL.createObjectURL(file);
+        const video = document.createElement('video');
+        video.muted = true; video.preload = 'auto';
+        video.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+
+        video.addEventListener('loadedmetadata', async () => {
+            const duration = video.duration;
+            const W = video.videoWidth  || 1280;
+            const H = video.videoHeight || 720;
+
+            // Alle Frame-Zeitpunkte rückwärts sammeln
+            const times = [];
+            for (let t = duration - step; t >= 0; t -= step) times.push(Math.max(0, t));
+
+            onProgress('Reverse: Frames werden gesammelt (0/' + times.length + ')');
+
+            // Jeden Frame als ImageBitmap einsammeln
+            const frames = [];
+            for (let i = 0; i < times.length; i++) {
+                try {
+                    await new Promise((res, rej) => {
+                        const tid = setTimeout(rej, 8000);
+                        video.onseeked = () => { clearTimeout(tid); res(); };
+                        video.currentTime = times[i];
+                    });
+                    const bmp = await createImageBitmap(video);
+                    frames.push(bmp);
+                    if (i % 10 === 0) onProgress('Reverse: Frames ' + (i+1) + '/' + times.length);
+                } catch(e) { break; }
+            }
+
+            URL.revokeObjectURL(url);
+            video.remove();
+
+            // Frames rückwärts auf Canvas zeichnen und aufnehmen
+            const recCanvas = document.createElement('canvas');
+            recCanvas.width = W; recCanvas.height = H;
+            const recCtx = recCanvas.getContext('2d');
+
+            const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+                ? 'video/webm;codecs=vp9'
+                : MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+                    ? 'video/webm;codecs=vp8' : 'video/webm';
+
+            const stream   = recCanvas.captureStream(fps);
+            const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8_000_000 });
+            const chunks   = [];
+            recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            recorder.onstop = async () => {
+                recCanvas.remove();
+                const blob = new Blob(chunks, { type: mimeType });
+                const arr  = await blob.arrayBuffer();
+                resolve(new Uint8Array(arr));
+            };
+
+            recorder.start(100);
+            let fi = 0;
+            const drawNext = () => {
+                if (fi < frames.length) {
+                    recCtx.drawImage(frames[fi], 0, 0, W, H);
+                    frames[fi].close();
+                    fi++;
+                    if (fi % 15 === 0) onProgress('Reverse: Kodiere ' + Math.round(fi / frames.length * 100) + '%');
+                    setTimeout(drawNext, 1000 / fps);
+                } else {
+                    if (recorder.state === 'recording') recorder.stop();
+                }
+            };
+            drawNext();
+        });
+
+        video.src = url;
+        video.load();
+    });
+}
+
+// Clip umkehren via Canvas – alle Frames sammeln, dann rückwärts abspielen und aufnehmen
+function reverseClipBrowser(file, onProgress) {
+    return new Promise((resolve) => {
+        const fps  = 30;
+        const step = 1 / fps;
+        const url  = URL.createObjectURL(file);
+        const video = document.createElement('video');
+        video.muted = true; video.preload = 'auto';
+        video.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+
+        video.addEventListener('loadedmetadata', async () => {
+            const duration = video.duration;
+            const W = video.videoWidth  || 1280;
+            const H = video.videoHeight || 720;
+
+            const times = [];
+            for (let t = duration - step; t >= 0; t -= step) times.push(Math.max(0, t));
+
+            onProgress('Reverse: Frames sammeln (0/' + times.length + ')');
+
+            const frames = [];
+            for (let i = 0; i < times.length; i++) {
+                try {
+                    await new Promise((res, rej) => {
+                        const tid = setTimeout(rej, 8000);
+                        video.onseeked = () => { clearTimeout(tid); res(); };
+                        video.currentTime = times[i];
+                    });
+                    const bmp = await createImageBitmap(video);
+                    frames.push(bmp);
+                    if (i % 10 === 0) onProgress('Reverse: Frames ' + (i+1) + '/' + times.length);
+                } catch(e) { break; }
+            }
+
+            URL.revokeObjectURL(url);
+            video.remove();
+
+            const recCanvas = document.createElement('canvas');
+            recCanvas.width = W; recCanvas.height = H;
+            const recCtx = recCanvas.getContext('2d');
+
+            const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+                ? 'video/webm;codecs=vp9'
+                : MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+                    ? 'video/webm;codecs=vp8' : 'video/webm';
+
+            const stream   = recCanvas.captureStream(fps);
+            const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8_000_000 });
+            const chunks   = [];
+            recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            recorder.onstop = async () => {
+                recCanvas.remove();
+                const blob = new Blob(chunks, { type: mimeType });
+                const arr  = await blob.arrayBuffer();
+                resolve(new Uint8Array(arr));
+            };
+
+            recorder.start(100);
+            let fi = 0;
+            const drawNext = () => {
+                if (fi < frames.length) {
+                    recCtx.drawImage(frames[fi], 0, 0, W, H);
+                    frames[fi].close();
+                    fi++;
+                    if (fi % 15 === 0) onProgress('Reverse: Kodiere ' + Math.round(fi / frames.length * 100) + '%');
+                    setTimeout(drawNext, 1000 / fps);
+                } else {
+                    if (recorder.state === 'recording') recorder.stop();
+                }
+            };
+            drawNext();
         });
 
         video.src = url;
