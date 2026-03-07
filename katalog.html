@@ -19,10 +19,9 @@
     --accent:    #d4a535;
     --frame:     3px solid var(--brown);
     --shadow:    4px 4px 0 var(--brown);
-    --gallery-url: "https://www.deviantart.com/rembrandtiusai/tier/rembrandtius-CLIPS-AI-MUSCLE-MOVEMENT-1238677185";
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
   body { background: #2a1a08; font-family: 'Courier Prime', monospace; color: var(--ink); min-height: 100vh; }
 
   /* ── STARTSEITE ─────────────────────────── */
@@ -38,42 +37,41 @@
       repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(74,44,20,.04) 29px);
     pointer-events: none;
   }
-  .titel-band { background: var(--terra); color: var(--cream); padding: 10px 40px; font-family: 'Special Elite', cursive; font-size: .75rem; letter-spacing: .25em; text-transform: uppercase; margin-bottom: 12px; border: 2px solid var(--brown); box-shadow: var(--shadow); }
-  .titel-hauptwort { font-family: 'Playfair Display', serif; font-size: clamp(3.5rem,10vw,7rem); font-weight: 700; line-height: .9; color: var(--brown); text-align: center; letter-spacing: -.03em; }
-  .titel-untertitel { font-family: 'Special Elite', cursive; font-size: .9rem; color: var(--terra-dk); letter-spacing: .15em; text-transform: uppercase; margin: 14px 0 40px; }
 
-  .start-box { background: var(--cream); border: var(--frame); box-shadow: var(--shadow); padding: 28px 36px; max-width: 480px; width: 100%; position: relative; }
-  .start-box::before { content: '▶ AUSWAHL'; position: absolute; top: -12px; left: 16px; background: var(--terra); color: var(--cream); font-family: 'Special Elite', cursive; font-size: .7rem; letter-spacing: .2em; padding: 2px 10px; border: 2px solid var(--brown); }
+  /* Cover-Bild als Hintergrund */
+  #cover-canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; opacity: .18; pointer-events: none;
+  }
 
-  .option-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px dashed var(--brown-lt); cursor: pointer; }
-  .option-row:last-of-type { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-  .option-row input[type="radio"] { appearance: none; width: 20px; height: 20px; border: 2px solid var(--brown); background: var(--paper); cursor: pointer; flex-shrink: 0; margin-top: 3px; position: relative; transition: background .15s; }
-  .option-row input[type="radio"]:checked { background: var(--terra); }
-  .option-row input[type="radio"]:checked::after { content: '✕'; position: absolute; inset: 0; font-size: .75rem; color: var(--cream); display: flex; align-items: center; justify-content: center; }
-  .option-info { flex: 1; }
-  .option-titel { font-weight: 700; font-size: .95rem; color: var(--brown); }
-  .option-meta  { font-size: .75rem; color: var(--brown-lt); margin-top: 3px; line-height: 1.5; }
-  .option-preis { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--terra); white-space: nowrap; align-self: center; }
+  .start-inhalt { position: relative; z-index: 1; text-align: center; }
 
-  .start-btn { display: block; width: 100%; margin-top: 24px; padding: 14px; background: var(--terra); color: var(--cream); border: 2px solid var(--brown); box-shadow: var(--shadow); font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: .15em; text-transform: uppercase; cursor: pointer; transition: transform .1s, box-shadow .1s; }
-  .start-btn:hover  { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--brown); }
-  .start-btn:active { transform: translate(4px,4px); box-shadow: none; }
-  .impressum { margin-top: 28px; font-size: .65rem; color: var(--brown-lt); text-align: center; letter-spacing: .08em; line-height: 1.8; }
+  .titel-band { display: inline-block; background: var(--terra); color: var(--cream); padding: 8px 32px; font-family: 'Special Elite', cursive; font-size: .7rem; letter-spacing: .25em; text-transform: uppercase; margin-bottom: 16px; border: 2px solid var(--brown); box-shadow: var(--shadow); }
+
+  .titel-hauptwort { font-family: 'Playfair Display', serif; font-size: clamp(4rem,12vw,8rem); font-weight: 700; line-height: .88; color: var(--brown); letter-spacing: -.03em; margin-bottom: 14px; }
+
+  .autor-name { font-family: 'Special Elite', cursive; font-size: 1rem; color: var(--terra-dk); letter-spacing: .2em; text-transform: uppercase; margin-bottom: 32px; }
+
+  .enter-btn {
+    display: inline-block; padding: 13px 36px;
+    background: var(--terra); color: var(--cream);
+    border: 2px solid var(--brown); box-shadow: var(--shadow);
+    font-family: 'Special Elite', cursive; font-size: .9rem; letter-spacing: .15em;
+    text-transform: uppercase; cursor: pointer; transition: transform .1s, box-shadow .1s;
+  }
+  .enter-btn:hover  { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--brown); }
+  .enter-btn:active { transform: translate(4px,4px); box-shadow: none; }
 
   /* ── KATALOG ────────────────────────────── */
   #katalog { display: none; }
 
   .katalog-header { background: var(--terra); color: var(--cream); display: flex; align-items: center; justify-content: space-between; padding: 10px 24px; border-bottom: 3px solid var(--brown); position: sticky; top: 0; z-index: 100; }
   .katalog-header .logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; }
-  .katalog-header nav { display: flex; gap: 16px; font-family: 'Special Elite', cursive; font-size: .7rem; letter-spacing: .15em; text-transform: uppercase; }
-  .katalog-header nav a { color: var(--cream); text-decoration: none; opacity: .8; cursor: pointer; }
-  .katalog-header nav a:hover { opacity: 1; }
   .seiten-nav { display: flex; gap: 10px; }
   .nav-btn { background: var(--terra-dk); color: var(--cream); border: 1.5px solid var(--cream); font-family: 'Special Elite', cursive; font-size: .7rem; letter-spacing: .1em; padding: 4px 12px; cursor: pointer; transition: background .15s; }
   .nav-btn:hover { background: var(--brown); }
   .nav-btn:disabled { opacity: .35; cursor: default; }
 
-  /* Ladeindikator */
   #lader { text-align: center; padding: 80px 20px; color: var(--cream); font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: .2em; }
 
   /* ── DOPPELSEITE ────────────────────────── */
@@ -86,89 +84,43 @@
   .kapitel-nr { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--terra); line-height: 1; }
   .kapitel-titel { font-family: 'Special Elite', cursive; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--brown); }
 
-  /* ── ITEM-GRID: 3 Spalten × 2 Zeilen = 6 pro Seite ────── */
-  .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  /* ── ITEM-GRID ──────────────────────────── */
+  .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 
-  /* ── BILD-KARTE ─────────────────────────── */
   .item-karte { border: 2px solid var(--brown); box-shadow: 2px 2px 0 var(--brown); overflow: hidden; background: var(--brown); position: relative; }
 
-  /* Bild: contain (kein Crop!), schwarzer Hintergrund */
-  .item-karte .bild-box {
+  /* Canvas statt img – verhindert "Bild öffnen" */
+  .item-karte canvas {
+    display: block; width: 100%; aspect-ratio: 1/1;
     background: #111;
-    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; /* Canvas selbst nicht anklickbar */
+  }
+
+  /* Video-Karte: kein Klick, kein Play */
+  .item-karte .video-overlay {
+    position: absolute; top: 0; left: 0; right: 0;
     aspect-ratio: 1/1;
-    overflow: hidden;
+    background: rgba(74,44,20,.0);
+    pointer-events: none;
   }
-  .item-karte .bild-box img {
-    max-width: 100%; max-height: 100%;
-    width: auto; height: auto;
-    object-fit: contain;
-    display: block;
+  .video-label {
+    position: absolute; top: 4px; left: 4px;
+    background: var(--terra); color: var(--cream);
+    font-family: 'Special Elite', cursive; font-size: .5rem; letter-spacing: .1em;
+    padding: 2px 5px; pointer-events: none;
   }
-
-  /* Video-Karte: Vorschaubild + Play */
-  .item-karte.video-karte { cursor: pointer; }
-  .item-karte .video-box {
-    background: #111;
-    display: flex; align-items: center; justify-content: center;
-    aspect-ratio: 1/1;
-    overflow: hidden;
-    position: relative;
-  }
-  .item-karte .video-box img {
-    max-width: 100%; max-height: 100%;
-    width: auto; height: auto;
-    object-fit: contain;
-    display: block;
-  }
-  .item-karte .video-box .play-mini {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(74,44,20,.3);
-    transition: background .15s;
-  }
-  .item-karte.video-karte:hover .play-mini { background: rgba(74,44,20,.5); }
-  .play-mini-btn {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: var(--terra); border: 2px solid var(--cream);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 1px 1px 0 var(--brown);
-  }
-  .play-mini-btn svg { fill: var(--cream); width: 12px; height: 12px; margin-left: 2px; }
-
-  .video-label { background: var(--terra); color: var(--cream); font-family: 'Special Elite', cursive; font-size: .5rem; letter-spacing: .1em; padding: 2px 5px; position: absolute; top: 4px; left: 4px; }
-
-  .item-karte .item-name {
-    background: var(--cream); border-top: 1.5px solid var(--brown);
-    padding: 4px 6px;
-    font-size: .6rem; color: var(--brown-lt); letter-spacing: .05em;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-
-  /* ── LIGHTBOX ────────────────────────────── */
-  .lightbox { display: none; position: fixed; inset: 0; background: rgba(20,10,2,.95); z-index: 1000; align-items: center; justify-content: center; }
-  .lightbox.aktiv { display: flex; }
-  .lightbox-inhalt { position: relative; width: 90vw; max-width: 900px; }
-  .lightbox-inhalt iframe { width: 100%; aspect-ratio: 4/3; border: 3px solid var(--brown); box-shadow: 6px 6px 0 var(--terra-dk); }
-  .lightbox-close { position: absolute; top: -40px; right: 0; background: var(--terra); color: var(--cream); border: 2px solid var(--cream); font-family: 'Special Elite', cursive; font-size: .75rem; letter-spacing: .15em; padding: 6px 14px; cursor: pointer; text-transform: uppercase; }
+  .item-name { background: var(--cream); border-top: 1.5px solid var(--brown); padding: 4px 6px; font-size: .6rem; color: var(--brown-lt); letter-spacing: .05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* ── TICKER ──────────────────────────────── */
-  .ticker-band {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 36px;
-    background: var(--terra); border-top: 2px solid var(--brown);
-    overflow: hidden; display: flex; align-items: center;
-  }
-  .ticker-track {
-    display: flex; white-space: nowrap;
-    animation: ticker-lauf 22s linear infinite;
-  }
-  .ticker-track a {
-    color: var(--cream); text-decoration: none;
-    font-family: 'Special Elite', cursive; font-size: .72rem; letter-spacing: .18em;
-    text-transform: uppercase; padding: 0 40px;
-  }
-  .ticker-sep { color: var(--accent); padding: 0 10px; }
+  .ticker-band { position: absolute; bottom: 0; left: 0; right: 0; height: 36px; background: var(--terra); border-top: 2px solid var(--brown); overflow: hidden; display: flex; align-items: center; }
+  .ticker-track { display: flex; white-space: nowrap; animation: ticker-lauf 24s linear infinite; }
+  .ticker-track a { color: var(--cream); text-decoration: none; font-family: 'Special Elite', cursive; font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; padding: 0 40px; }
   @keyframes ticker-lauf { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* Seitenzahl */
+  .seiten-nr { position: absolute; bottom: 42px; font-family: 'Special Elite', cursive; font-size: .65rem; color: var(--brown-lt); letter-spacing: .1em; }
+  .seite:first-child .seiten-nr { left: 20px; }
+  .seite:last-child  .seiten-nr { right: 20px; }
 
   @media (max-width: 700px) {
     .doppelseite { grid-template-columns: 1fr; }
@@ -182,36 +134,12 @@
 
 <!-- ══════════ STARTSEITE ══════════ -->
 <div id="startseite">
-  <div class="titel-band">Bildwerk Verlag · Ausgabe 2025</div>
-  <div class="titel-hauptwort">BILD<br>WERK</div>
-  <div class="titel-untertitel">Fotografie &amp; Bewegtbild · Katalog Nr. 1</div>
-  <div class="start-box">
-    <label class="option-row">
-      <input type="radio" name="modus" value="lesen" checked>
-      <div class="option-info">
-        <div class="option-titel">Nur lesen &amp; ansehen</div>
-        <div class="option-meta">Freier Zugang · Clips starten auf Antippen · Vorschau-Qualität</div>
-      </div>
-      <div class="option-preis">€ 0,–</div>
-    </label>
-    <label class="option-row">
-      <input type="radio" name="modus" value="hd">
-      <div class="option-info">
-        <div class="option-titel">HD Download</div>
-        <div class="option-meta">Bis 4K · Alle Formate · Einzellizenzen</div>
-      </div>
-      <div class="option-preis">€ 12,–</div>
-    </label>
-    <label class="option-row">
-      <input type="radio" name="modus" value="paket">
-      <div class="option-info">
-        <div class="option-titel">Gesamtpaket Katalog Nr. 1</div>
-        <div class="option-meta">Alle Bilder &amp; Clips · Unbegrenzte Nutzung · Print-Rechte</div>
-      </div>
-      <div class="option-preis">€ 49,–</div>
-    </label>
-    <button class="start-btn" onclick="starteKatalog()">▶ &nbsp; Katalog aufschlagen</button>
-    <div class="impressum">Eigenes Material · Alle Rechte vorbehalten · BILDWERK 2025</div>
+  <canvas id="cover-canvas"></canvas>
+  <div class="start-inhalt">
+    <div class="titel-band">Bildwerk Verlag · 2025</div>
+    <div class="titel-hauptwort">BILD<br>WERK</div>
+    <div class="autor-name">Rembrandtius AI</div>
+    <div class="enter-btn" onclick="starteKatalog()">Katalog aufschlagen</div>
   </div>
 </div>
 
@@ -220,241 +148,235 @@
 <div id="katalog">
   <header class="katalog-header">
     <div class="logo">BILDWERK</div>
-    <nav>
-      <div class="seiten-nav">
-        <button class="nav-btn" id="btn-zurueck" onclick="blättern(-1)" disabled>◀ zurück</button>
-        <button class="nav-btn" id="btn-vor"     onclick="blättern(1)">vor ▶</button>
-      </div>
-    </nav>
+    <div class="seiten-nav">
+      <button class="nav-btn" id="btn-zurueck" onclick="blättern(-1)" disabled>◀ zurück</button>
+      <button class="nav-btn" id="btn-vor"     onclick="blättern(1)">vor ▶</button>
+    </div>
   </header>
-
-  <div id="lader">+++ Lade Galerie +++ bitte warten +++</div>
+  <div id="lader">+++ Lade Galerie +++</div>
   <div id="seiten-container"></div>
-</div>
-
-<!-- Lightbox -->
-<div class="lightbox" id="lightbox">
-  <div class="lightbox-inhalt">
-    <button class="lightbox-close" onclick="schliesseLightbox()">✕ Schließen</button>
-    <iframe id="lb-frame" src="" allowfullscreen allow="autoplay; fullscreen"></iframe>
-  </div>
 </div>
 
 
 <script>
-const ITEM_ID   = 'nachhilfe-1';
-const GALERIE   = 'https://www.deviantart.com/rembrandtiusai/tier/rembrandtius-CLIPS-AI-MUSCLE-MOVEMENT-1238677185';
-const PRO_SEITE = 6;   // max Items pro Seite (= halbe Doppelseite)
+/* ════════════════════════════════════════════
+   KONFIGURATION – verschlüsselt im Code
+   (Basis64-kodiert, nicht im Klartext lesbar)
+════════════════════════════════════════════ */
+const _k = atob('bmFjaGhpbGZlLTE=');                          // item id
+const _g = atob('aHR0cHM6Ly93d3cuZGV2aWFudGFydC5jb20vcmVtYnJhbmR0aXVzYWkvdGllci9yZW1icmFuZHRpdXMtQ0xJUFMtQUktTVVTQ0xFLU1PVkVNRU5ULTI=' + 'zODY3NzE4NQ=='); // gallery url
 
-const BILD_FORMATE  = ['jpeg','jpg','png','gif','tiff','tif','webp'];
-const VIDEO_FORMATE = ['mp4','mpeg4','mov','avi','mkv','webm','ogv','h.264'];
+const BILD_EXT  = ['jpeg','jpg','png','gif','webp','tiff','tif'];
+const VIDEO_EXT = ['mp4','mpeg4','mov','avi','mkv','webm','ogv'];
+const PRO_SEITE = 6;
 
-let alleItems   = [];   // {name, typ:'bild'|'video', url, thumb}
-let aktSeite    = 0;    // Doppelseiten-Index
-let doppelSeiten = [];  // Array von Doppelseiten [{links:[...], rechts:[...]}]
+let alleItems    = [];
+let doppelSeiten = [];
+let aktSeite     = 0;
+
+/* ── Rechtsklick & Selektion sperren ────── */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('dragstart',   e => e.preventDefault());
 
 /* ── START ───────────────────────────────── */
 function starteKatalog() {
-  const checked = document.querySelector('input[name="modus"]:checked');
-  if (checked && checked.value !== 'lesen') document.body.classList.add('bestell-modus');
   document.getElementById('startseite').style.display = 'none';
   document.getElementById('katalog').style.display    = 'block';
   ladeMetadaten();
 }
 
-/* ── METADATEN VON ARCHIVE.ORG LADEN ────── */
+/* ── Bild sicher laden → Blob-URL (kein Herkunfts-URL im DOM) ── */
+async function sicheresBlob(url) {
+  try {
+    const r = await fetch(url);
+    const b = await r.blob();
+    return URL.createObjectURL(b);
+  } catch {
+    return null;
+  }
+}
+
+/* ── Bild auf Canvas zeichnen ────────────── */
+async function zeichneCanvas(canvas, srcUrl) {
+  const blobUrl = await sicheresBlob(srcUrl);
+  if (!blobUrl) return;
+  const img = new Image();
+  img.onload = () => {
+    const s = Math.min(canvas.width / img.width, canvas.height / img.height);
+    const w = img.width * s, h = img.height * s;
+    const x = (canvas.width  - w) / 2;
+    const y = (canvas.height - h) / 2;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, x, y, w, h);
+    URL.revokeObjectURL(blobUrl);
+  };
+  img.src = blobUrl;
+}
+
+/* ── Cover-Bild auf Startseite ───────────── */
+async function ladeCoverBild() {
+  try {
+    const res  = await fetch(`https://archive.org/metadata/${_k}`);
+    const data = await res.json();
+    const bilder = (data.files || []).filter(f => {
+      const ext = (f.name || '').split('.').pop().toLowerCase();
+      return BILD_EXT.includes(ext) && f.source === 'original';
+    });
+    if (!bilder.length) return;
+    const zufaellig = bilder[Math.floor(Math.random() * bilder.length)];
+    const url = `https://archive.org/download/${_k}/${encodeURIComponent(zufaellig.name)}`;
+    const canvas = document.getElementById('cover-canvas');
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    await zeichneCanvas(canvas, url);
+  } catch(e) { /* kein Cover – kein Problem */ }
+}
+
+/* ── Metadaten laden ─────────────────────── */
 async function ladeMetadaten() {
   try {
-    const res  = await fetch(`https://archive.org/metadata/${ITEM_ID}`);
+    const res  = await fetch(`https://archive.org/metadata/${_k}`);
     const data = await res.json();
-    const files = data.files || [];
+    const files = (data.files || []).filter(f => f.source === 'original' && !f.name.endsWith('_meta.xml') && !f.name.includes('__ia_thumb'));
 
     alleItems = [];
     files.forEach(f => {
-      const name = f.name || '';
-      const ext  = name.split('.').pop().toLowerCase();
-      const src  = f.source || '';
-
-      // Nur Original-Dateien (keine Derivate wie _thumbs, .sqlite, _meta, _files)
-      if (src !== 'original') return;
-      if (name.endsWith('_meta.xml') || name.endsWith('_files.xml') || name.includes('__ia_thumb')) return;
-
-      const baseUrl = `https://archive.org/download/${ITEM_ID}/${encodeURIComponent(name)}`;
-
-      if (BILD_FORMATE.includes(ext)) {
-        alleItems.push({
-          name,
-          typ: 'bild',
-          url: baseUrl,
-          thumb: baseUrl
-        });
-      } else if (VIDEO_FORMATE.includes(ext)) {
-        alleItems.push({
-          name,
-          typ: 'video',
-          url: `https://archive.org/embed/${ITEM_ID}?start=0`,
-          // Für einzelne Videos in einem Multi-File-Item:
-          embedUrl: `https://archive.org/embed/${ITEM_ID}/${encodeURIComponent(name)}`,
-          thumb: `https://archive.org/services/img/${ITEM_ID}`
-        });
+      const ext = (f.name || '').split('.').pop().toLowerCase();
+      if (BILD_EXT.includes(ext)) {
+        alleItems.push({ name: f.name, typ: 'bild',
+          url: `https://archive.org/download/${_k}/${encodeURIComponent(f.name)}` });
+      } else if (VIDEO_EXT.includes(ext)) {
+        alleItems.push({ name: f.name, typ: 'video',
+          thumb: `https://archive.org/services/img/${_k}` });
       }
     });
 
-    if (alleItems.length === 0) {
-      // Fallback: Item hat vielleicht nur ein Video
-      alleItems.push({
-        name: ITEM_ID,
-        typ: 'video',
-        url: `https://archive.org/embed/${ITEM_ID}`,
-        embedUrl: `https://archive.org/embed/${ITEM_ID}`,
-        thumb: `https://archive.org/services/img/${ITEM_ID}`
-      });
+    if (!alleItems.length) {
+      alleItems.push({ name: _k, typ: 'video', thumb: `https://archive.org/services/img/${_k}` });
     }
 
     bauteDoppelseiten();
     zeigeSeite(0);
     document.getElementById('lader').style.display = 'none';
   } catch(e) {
-    document.getElementById('lader').textContent = '⚠ Fehler beim Laden. Bitte Seite neu laden.';
-    console.error(e);
+    document.getElementById('lader').textContent = '⚠ Verbindungsfehler.';
   }
 }
 
-/* ── DOPPELSEITEN AUFTEILEN ─────────────── */
+/* ── Doppelseiten aufteilen ──────────────── */
 function bauteDoppelseiten() {
   doppelSeiten = [];
-  // Je 12 Items pro Doppelseite (6 links, 6 rechts)
   for (let i = 0; i < alleItems.length; i += PRO_SEITE * 2) {
-    const chunk = alleItems.slice(i, i + PRO_SEITE * 2);
     doppelSeiten.push({
-      links:  chunk.slice(0, PRO_SEITE),
-      rechts: chunk.slice(PRO_SEITE, PRO_SEITE * 2)
+      links:  alleItems.slice(i,            i + PRO_SEITE),
+      rechts: alleItems.slice(i + PRO_SEITE, i + PRO_SEITE * 2)
     });
   }
 }
 
-/* ── SEITE ANZEIGEN ─────────────────────── */
+/* ── Seite anzeigen ──────────────────────── */
 function zeigeSeite(nr) {
   aktSeite = nr;
   const container = document.getElementById('seiten-container');
   container.innerHTML = '';
-
   const ds = doppelSeiten[nr];
   if (!ds) return;
 
-  const seitenNrLinks  = nr * 2 + 2;
-  const seitenNrRechts = nr * 2 + 3;
-  const kapitelNr = ['I','II','III','IV','V','VI','VII','VIII','IX','X'][nr] || (nr+1);
-
+  const rn = ['I','II','III','IV','V','VI','VII','VIII','IX','X'][nr] || (nr+1);
   const div = document.createElement('div');
   div.className = 'doppelseite';
   div.innerHTML = `
     <div class="buch-ruecken"></div>
-
-    <div class="seite" id="seite-links">
+    <div class="seite">
       <div class="kapitel-kopf">
-        <div class="kapitel-nr">${kapitelNr}</div>
+        <div class="kapitel-nr">${rn}</div>
         <div class="kapitel-titel">Bildwerk · Galerie</div>
       </div>
-      <div class="item-grid" id="grid-links"></div>
-      <div class="seiten-nr">Seite ${seitenNrLinks}</div>
-      ${tickerHTML()}
+      <div class="item-grid" id="gl"></div>
+      <div class="seiten-nr">Seite ${nr*2+2}</div>
+      ${ticker()}
     </div>
-
-    <div class="seite" id="seite-rechts">
-      <div class="kapitel-kopf" style="flex-direction:row-reverse; justify-content:flex-start;">
-        <div class="kapitel-nr" style="color:var(--terra-dk)">${kapitelNr}</div>
+    <div class="seite">
+      <div class="kapitel-kopf" style="flex-direction:row-reverse;justify-content:flex-start;">
+        <div class="kapitel-nr" style="color:var(--terra-dk)">${rn}</div>
         <div class="kapitel-titel">Fortsetzung</div>
       </div>
-      <div class="item-grid" id="grid-rechts"></div>
-      <div class="seiten-nr" style="right:20px">Seite ${seitenNrRechts}</div>
-      ${tickerHTML()}
-    </div>
-  `;
+      <div class="item-grid" id="gr"></div>
+      <div class="seiten-nr" style="right:20px">Seite ${nr*2+3}</div>
+      ${ticker()}
+    </div>`;
   container.appendChild(div);
 
-  fuelleGrid('grid-links',  ds.links);
-  fuelleGrid('grid-rechts', ds.rechts);
+  fuelleGrid('gl', ds.links);
+  fuelleGrid('gr', ds.rechts);
 
-  // Nav-Buttons
   document.getElementById('btn-zurueck').disabled = (nr === 0);
   document.getElementById('btn-vor').disabled     = (nr >= doppelSeiten.length - 1);
 }
 
-/* ── GRID BEFÜLLEN ──────────────────────── */
-function fuelleGrid(gridId, items) {
-  const grid = document.getElementById(gridId);
+/* ── Grid befüllen ───────────────────────── */
+function fuelleGrid(id, items) {
+  const grid = document.getElementById(id);
   if (!grid) return;
-  items.forEach((item, idx) => {
+  items.forEach(item => {
     const karte = document.createElement('div');
-    karte.className = 'item-karte' + (item.typ === 'video' ? ' video-karte' : '');
+    karte.className = 'item-karte';
+    const label = item.name.replace(/\.[^.]+$/, '').replace(/_/g,' ');
 
-    const kurzname = item.name.replace(/\.[^.]+$/, '').replace(/_/g,' ');
+    const canvas = document.createElement('canvas');
+    canvas.width  = 300;
+    canvas.height = 300;
 
     if (item.typ === 'bild') {
-      karte.innerHTML = `
-        <div class="bild-box">
-          <img src="${item.thumb}" alt="${kurzname}" loading="lazy"
-               onerror="this.style.display='none'">
-        </div>
-        <div class="item-name">${kurzname}</div>`;
+      zeichneCanvas(canvas, item.url);
     } else {
-      karte.innerHTML = `
-        <div class="video-box">
-          <img src="${item.thumb}" alt="${kurzname}" loading="lazy"
-               onerror="this.src='https://archive.org/images/notfound.png'">
-          <div class="play-mini">
-            <div class="play-mini-btn"><svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg></div>
-          </div>
-          <div class="video-label">▶ VIDEO</div>
-        </div>
-        <div class="item-name">${kurzname}</div>`;
-      karte.onclick = () => oeffneLightbox(item.embedUrl || item.url);
+      // Video: Vorschaubild aus archive.org als Canvas – kein Player
+      zeichneCanvas(canvas, item.thumb);
+      const badge = document.createElement('div');
+      badge.className = 'video-label';
+      badge.textContent = '▶ VIDEO';
+      karte.appendChild(badge);
+      // Overlay verhindert jeden Klick auf das Canvas-Bild
+      const ov = document.createElement('div');
+      ov.className = 'video-overlay';
+      karte.appendChild(ov);
     }
+
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'item-name';
+    nameDiv.textContent = label;
+
+    karte.appendChild(canvas);
+    karte.appendChild(nameDiv);
     grid.appendChild(karte);
   });
 }
 
-/* ── TICKER HTML ────────────────────────── */
-function tickerHTML() {
-  const text = '+++ nur hier: BIG GALLERY +++ nur hier: BIG GALLERY +++';
-  // Doppelt für nahtlosen Loop
-  return `
-    <div class="ticker-band">
-      <div class="ticker-track">
-        <a href="${GALERIE}" target="_blank">${text}</a>
-        <a href="${GALERIE}" target="_blank">${text}</a>
-        <a href="${GALERIE}" target="_blank">${text}</a>
-        <a href="${GALERIE}" target="_blank">${text}</a>
-      </div>
-    </div>`;
+/* ── Ticker ──────────────────────────────── */
+function ticker() {
+  const t = '+++ nur hier: BIG GALLERY +++ nur hier: BIG GALLERY +++';
+  return `<div class="ticker-band"><div class="ticker-track">
+    <a href="${_g}" target="_blank" rel="noopener">${t}</a>
+    <a href="${_g}" target="_blank" rel="noopener">${t}</a>
+    <a href="${_g}" target="_blank" rel="noopener">${t}</a>
+    <a href="${_g}" target="_blank" rel="noopener">${t}</a>
+  </div></div>`;
 }
 
-/* ── NAVIGATION ──────────────────────────── */
-function blättern(richtung) {
-  const neu = aktSeite + richtung;
-  if (neu >= 0 && neu < doppelSeiten.length) {
-    schliesseLightbox();
-    zeigeSeite(neu);
-    window.scrollTo(0, 0);
-  }
+/* ── Navigation ──────────────────────────── */
+function blättern(d) {
+  const n = aktSeite + d;
+  if (n >= 0 && n < doppelSeiten.length) { zeigeSeite(n); window.scrollTo(0,0); }
 }
-
 document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') blättern(1);
   if (e.key === 'ArrowLeft')  blättern(-1);
-  if (e.key === 'Escape')     schliesseLightbox();
 });
 
-/* ── LIGHTBOX ────────────────────────────── */
-function oeffneLightbox(embedUrl) {
-  document.getElementById('lb-frame').src = embedUrl + '?autoplay=1&start=0';
-  document.getElementById('lightbox').classList.add('aktiv');
-}
-function schliesseLightbox() {
-  document.getElementById('lb-frame').src = '';
-  document.getElementById('lightbox').classList.remove('aktiv');
-}
+/* ── Cover sofort laden ──────────────────── */
+ladeCoverBild();
 </script>
 </body>
 </html>
