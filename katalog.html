@@ -73,30 +73,52 @@
   #lader { text-align: center; padding: 80px 20px; color: var(--cream); font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: .2em; }
 
   /* ── DOPPELSEITE ─────────── */
-  /* Buch-Container: zentriert, max Breite wie ein A3-Buch */
-  #seiten-container { display: flex; justify-content: center; background: #2a1a08; padding: 24px 0; }
+  /* Buch passt exakt in 1920×1080 bei 100% Zoom */
+  #seiten-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background: #2a1a08;
+    /* Höhe = Viewport minus Header (44px) */
+    min-height: calc(100vh - 44px);
+    padding: 0;
+  }
 
   .doppelseite {
     display: grid;
     grid-template-columns: 1fr 1fr;
     border: 3px solid var(--brown);
-    box-shadow: 0 8px 32px rgba(0,0,0,.6);
+    box-shadow: 0 8px 40px rgba(0,0,0,.7);
     position: relative;
-    width: 100%;
-    max-width: 960px;
+    /* Breite: passt in 1920px, mit etwas Luft */
+    width: min(1800px, 100%);
+    /* Höhe: nie größer als Viewport minus Header */
+    max-height: calc(100vh - 44px);
+    overflow: hidden;
   }
-  .seite { background: var(--paper); padding: 20px 16px 16px; position: relative; border-right: 2px solid var(--brown-lt); }
+
+  .seite {
+    background: var(--paper);
+    padding: clamp(10px, 1.2vw, 20px);
+    position: relative;
+    border-right: 2px solid var(--brown-lt);
+    /* Höhe fixiert, kein Scrollen innerhalb der Seite */
+    height: calc(100vh - 44px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
   .seite:last-child { background: var(--paper-alt); border-right: none; }
   .buch-ruecken { position: absolute; top: 0; bottom: 0; left: 50%; width: 6px; z-index: 10; background: linear-gradient(90deg,rgba(74,44,20,.3),rgba(74,44,20,.05),rgba(74,44,20,.3)); pointer-events: none; }
-  .kapitel-kopf { border-bottom: 2px solid var(--brown); margin-bottom: 16px; padding-bottom: 8px; display: flex; align-items: baseline; gap: 12px; }
-  .kapitel-nr { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--terra); line-height: 1; }
+  .kapitel-kopf { border-bottom: 2px solid var(--brown); margin-bottom: 0; padding-bottom: 6px; display: flex; align-items: baseline; gap: 10px; flex-shrink: 0; }
+  .kapitel-nr { font-family: 'Playfair Display', serif; font-size: clamp(1.2rem,2vw,2rem); font-weight: 700; color: var(--terra); line-height: 1; }
   .kapitel-titel { font-family: 'Special Elite', cursive; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--brown); }
-  .seiten-nr { position: absolute; bottom: 42px; font-family: 'Special Elite', cursive; font-size: .65rem; color: var(--brown-lt); letter-spacing: .1em; }
-  .seite:first-child .seiten-nr { left: 20px; }
-  .seite:last-child  .seiten-nr { right: 20px; }
+  .seiten-nr { font-family: 'Special Elite', cursive; font-size: .6rem; color: var(--brown-lt); letter-spacing: .1em; margin-top: 6px; flex-shrink: 0; }
+  .seite:first-child .seiten-nr { text-align: left; }
+  .seite:last-child  .seiten-nr { text-align: right; }
 
   /* ── ITEM-GRID ───────────── */
-  .item-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .item-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 6px; flex: 1; overflow: hidden; align-content: start; }
 
   .item-karte {
     border: 2px solid var(--brown);
@@ -144,22 +166,28 @@
     border-top: 2px solid var(--brown);
     border-bottom: 2px solid var(--brown);
     overflow: hidden; display: flex; align-items: center;
-    margin-bottom: 12px; flex-shrink: 0;
+    margin-bottom: 8px; flex-shrink: 0;
   }
   .ticker-track { display: flex; white-space: nowrap; animation: ticker-lauf 26s linear infinite; }
   .ticker-track a { color: var(--cream); text-decoration: none; font-family: 'Special Elite', cursive; font-size: .82rem; letter-spacing: .14em; text-transform: uppercase; padding: 0 40px; }
   @keyframes ticker-lauf { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
   /* ── MOBIL ───────────────── */
-  @media (max-width: 980px) {
-    .doppelseite { max-width: 100%; }
-    #seiten-container { padding: 0; }
-  }
   @media (max-width: 700px) {
-    /* Handy: eine Seite auf einmal, volle Breite */
-    #seiten-container { padding: 0; }
-    .doppelseite { grid-template-columns: 1fr; border-left: none; border-right: none; box-shadow: none; }
-    .seite { padding: 14px 10px 14px; }
+    /* Handy: eine Seite auf einmal, volle Breite, scrollbar */
+    .doppelseite {
+      grid-template-columns: 1fr;
+      width: 100%;
+      max-height: none;
+      overflow: visible;
+      border-left: none; border-right: none; box-shadow: none;
+    }
+    .seite {
+      height: auto;
+      overflow: visible;
+      padding: 14px 10px;
+    }
+    .item-grid { overflow: visible; }
     .seite:last-child { border-top: 3px solid var(--brown); border-right: none; }
     .buch-ruecken { display: none; }
     .seiten-nr { display: none; }
