@@ -74,7 +74,7 @@
 
   /* ── DOPPELSEITE ─────────── */
   .doppelseite { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 4px solid var(--brown); position: relative; }
-  .seite { background: var(--paper); padding: 24px 20px 60px; position: relative; border-right: 2px solid var(--brown-lt); min-height: 100vh; }
+  .seite { background: var(--paper); padding: 24px 20px 16px; position: relative; border-right: 2px solid var(--brown-lt); min-height: 100vh; }
   .seite:last-child { background: var(--paper-alt); border-right: none; }
   .buch-ruecken { position: absolute; top: 0; bottom: 0; left: 50%; width: 6px; z-index: 10; background: linear-gradient(90deg,rgba(74,44,20,.3),rgba(74,44,20,.05),rgba(74,44,20,.3)); pointer-events: none; }
   .kapitel-kopf { border-bottom: 2px solid var(--brown); margin-bottom: 16px; padding-bottom: 8px; display: flex; align-items: baseline; gap: 12px; }
@@ -126,17 +126,36 @@
     letter-spacing: .05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
-  /* ── TICKER ──────────────── */
-  .ticker-band { position: absolute; bottom: 0; left: 0; right: 0; height: 36px; background: var(--terra); border-top: 2px solid var(--brown); overflow: hidden; display: flex; align-items: center; }
+  /* ── TICKER – oben, im normalen Fluss ── */
+  .ticker-band {
+    width: 100%; height: 34px;
+    background: var(--terra);
+    border-top: 2px solid var(--brown);
+    border-bottom: 2px solid var(--brown);
+    overflow: hidden; display: flex; align-items: center;
+    margin-bottom: 12px; flex-shrink: 0;
+  }
   .ticker-track { display: flex; white-space: nowrap; animation: ticker-lauf 26s linear infinite; }
   .ticker-track a { color: var(--cream); text-decoration: none; font-family: 'Special Elite', cursive; font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; padding: 0 40px; }
   @keyframes ticker-lauf { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
+  /* ── MOBIL ───────────────── */
   @media (max-width: 700px) {
     .doppelseite { grid-template-columns: 1fr; }
-    .seite:last-child { border-top: 3px solid var(--brown); }
+    .seite { min-height: unset; padding: 16px 12px 20px; }
+    .seite:last-child { border-top: 3px solid var(--brown); border-right: none; }
     .buch-ruecken { display: none; }
-    .item-grid { grid-template-columns: repeat(2,1fr); }
+    .seiten-nr { display: none; }
+    .item-grid { grid-template-columns: repeat(2,1fr); gap: 6px; }
+    .nav-btn { padding: 8px 18px; font-size: .8rem; }
+    .katalog-header { padding: 10px 14px; }
+    .katalog-header .logo { font-size: 1.1rem; }
+    .titel-hauptwort { font-size: clamp(3rem,18vw,5rem); }
+    .enter-btn { padding: 14px 28px; font-size: .85rem; }
+  }
+  @media (max-width: 380px) {
+    .item-grid { gap: 4px; }
+    .item-name { font-size: .5rem; }
   }
 </style>
 </head>
@@ -297,18 +316,18 @@ function zeigeSeite(nr) {
         <div class="kapitel-nr">${rn}</div>
         <div class="kapitel-titel">Bildwerk · Galerie</div>
       </div>
+      ${ticker()}
       <div class="item-grid" id="gl"></div>
       <div class="seiten-nr">Seite ${nr*2+2}</div>
-      ${ticker()}
     </div>
     <div class="seite">
       <div class="kapitel-kopf" style="flex-direction:row-reverse;justify-content:flex-start;">
         <div class="kapitel-nr" style="color:var(--terra-dk)">${rn}</div>
         <div class="kapitel-titel">Fortsetzung</div>
       </div>
+      ${ticker()}
       <div class="item-grid" id="gr"></div>
       <div class="seiten-nr" style="right:20px">Seite ${nr*2+3}</div>
-      ${ticker()}
     </div>`;
   c.appendChild(div);
   fuelleGrid('gl', ds.links);
@@ -368,6 +387,14 @@ document.addEventListener('keydown', e => {
 
 /* Sofort Vorschau-Bild für Startseite laden */
 ladeVorschau();
+
+/* ── Touch-Swipe für Handy ── */
+let _tx = 0;
+document.addEventListener('touchstart', e => { _tx = e.touches[0].clientX; }, {passive:true});
+document.addEventListener('touchend',   e => {
+  const dx = e.changedTouches[0].clientX - _tx;
+  if (Math.abs(dx) > 50) blättern(dx < 0 ? 1 : -1);
+}, {passive:true});
 </script>
 </body>
 </html>
