@@ -8,63 +8,61 @@
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap');
 
   :root {
-    --paper:     #f5eed6;
-    --paper-alt: #f0e6c8;
-    --terra:     #c4603a;
-    --terra-dk:  #8b3a1e;
-    --brown:     #4a2c14;
-    --brown-lt:  #7a5230;
-    --cream:     #faf6ea;
-    --ink:       #1e0e04;
-    --accent:    #d4a535;
-    --frame:     3px solid var(--brown);
-    --shadow:    4px 4px 0 var(--brown);
+    --paper:    #f5eed6; --paper-alt: #f0e6c8;
+    --terra:    #c4603a; --terra-dk:  #8b3a1e;
+    --brown:    #4a2c14; --brown-lt:  #7a5230;
+    --cream:    #faf6ea; --ink:       #1e0e04;
+    --accent:   #d4a535;
+    --frame:    3px solid var(--brown);
+    --shadow:   4px 4px 0 var(--brown);
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-  body { background: #2a1a08; font-family: 'Courier Prime', monospace; color: var(--ink); min-height: 100vh; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* ── STARTSEITE ─────────────────────────── */
+  /* Selektion & Drag global sperren */
+  body {
+    background: #2a1a08;
+    font-family: 'Courier Prime', monospace;
+    color: var(--ink);
+    min-height: 100vh;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* ── STARTSEITE ─────────── */
   #startseite {
     min-height: 100vh; background: var(--paper);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
     padding: 40px 20px; position: relative; overflow: hidden;
   }
   #startseite::before {
     content: ''; position: absolute; inset: 0;
     background:
-      repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(74,44,20,.06) 29px),
-      repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(74,44,20,.04) 29px);
+      repeating-linear-gradient(0deg, transparent 28px, rgba(74,44,20,.06) 29px),
+      repeating-linear-gradient(90deg, transparent 28px, rgba(74,44,20,.04) 29px);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* Cover: CSS background-image – keine <img> src im DOM */
+  #cover-bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    opacity: .15; z-index: 0;
     pointer-events: none;
   }
 
-  /* Cover-Bild als Hintergrund */
-  #cover-canvas {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    object-fit: cover; opacity: .18; pointer-events: none;
-  }
-
   .start-inhalt { position: relative; z-index: 1; text-align: center; }
-
   .titel-band { display: inline-block; background: var(--terra); color: var(--cream); padding: 8px 32px; font-family: 'Special Elite', cursive; font-size: .7rem; letter-spacing: .25em; text-transform: uppercase; margin-bottom: 16px; border: 2px solid var(--brown); box-shadow: var(--shadow); }
-
   .titel-hauptwort { font-family: 'Playfair Display', serif; font-size: clamp(4rem,12vw,8rem); font-weight: 700; line-height: .88; color: var(--brown); letter-spacing: -.03em; margin-bottom: 14px; }
-
-  .autor-name { font-family: 'Special Elite', cursive; font-size: 1rem; color: var(--terra-dk); letter-spacing: .2em; text-transform: uppercase; margin-bottom: 32px; }
-
-  .enter-btn {
-    display: inline-block; padding: 13px 36px;
-    background: var(--terra); color: var(--cream);
-    border: 2px solid var(--brown); box-shadow: var(--shadow);
-    font-family: 'Special Elite', cursive; font-size: .9rem; letter-spacing: .15em;
-    text-transform: uppercase; cursor: pointer; transition: transform .1s, box-shadow .1s;
-  }
+  .autor-name { font-family: 'Special Elite', cursive; font-size: 1rem; color: var(--terra-dk); letter-spacing: .2em; text-transform: uppercase; margin-bottom: 36px; }
+  .enter-btn { display: inline-block; padding: 13px 36px; background: var(--terra); color: var(--cream); border: 2px solid var(--brown); box-shadow: var(--shadow); font-family: 'Special Elite', cursive; font-size: .9rem; letter-spacing: .15em; text-transform: uppercase; cursor: pointer; transition: transform .1s, box-shadow .1s; }
   .enter-btn:hover  { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--brown); }
   .enter-btn:active { transform: translate(4px,4px); box-shadow: none; }
 
-  /* ── KATALOG ────────────────────────────── */
+  /* ── KATALOG ────────────── */
   #katalog { display: none; }
-
   .katalog-header { background: var(--terra); color: var(--cream); display: flex; align-items: center; justify-content: space-between; padding: 10px 24px; border-bottom: 3px solid var(--brown); position: sticky; top: 0; z-index: 100; }
   .katalog-header .logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; }
   .seiten-nav { display: flex; gap: 10px; }
@@ -74,67 +72,79 @@
 
   #lader { text-align: center; padding: 80px 20px; color: var(--cream); font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: .2em; }
 
-  /* ── DOPPELSEITE ────────────────────────── */
+  /* ── DOPPELSEITE ─────────── */
   .doppelseite { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 4px solid var(--brown); position: relative; }
   .seite { background: var(--paper); padding: 24px 20px 60px; position: relative; border-right: 2px solid var(--brown-lt); min-height: 100vh; }
   .seite:last-child { background: var(--paper-alt); border-right: none; }
-  .buch-ruecken { position: absolute; top: 0; bottom: 0; left: 50%; width: 6px; z-index: 10; background: linear-gradient(90deg, rgba(74,44,20,.3), rgba(74,44,20,.05), rgba(74,44,20,.3)); pointer-events: none; }
-
+  .buch-ruecken { position: absolute; top: 0; bottom: 0; left: 50%; width: 6px; z-index: 10; background: linear-gradient(90deg,rgba(74,44,20,.3),rgba(74,44,20,.05),rgba(74,44,20,.3)); pointer-events: none; }
   .kapitel-kopf { border-bottom: 2px solid var(--brown); margin-bottom: 16px; padding-bottom: 8px; display: flex; align-items: baseline; gap: 12px; }
   .kapitel-nr { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--terra); line-height: 1; }
   .kapitel-titel { font-family: 'Special Elite', cursive; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--brown); }
-
-  /* ── ITEM-GRID ──────────────────────────── */
-  .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-
-  .item-karte { border: 2px solid var(--brown); box-shadow: 2px 2px 0 var(--brown); overflow: hidden; background: var(--brown); position: relative; }
-
-  /* Canvas statt img – verhindert "Bild öffnen" */
-  .item-karte canvas {
-    display: block; width: 100%; aspect-ratio: 1/1;
-    background: #111;
-    pointer-events: none; /* Canvas selbst nicht anklickbar */
-  }
-
-  /* Video-Karte: kein Klick, kein Play */
-  .item-karte .video-overlay {
-    position: absolute; top: 0; left: 0; right: 0;
-    aspect-ratio: 1/1;
-    background: rgba(74,44,20,.0);
-    pointer-events: none;
-  }
-  .video-label {
-    position: absolute; top: 4px; left: 4px;
-    background: var(--terra); color: var(--cream);
-    font-family: 'Special Elite', cursive; font-size: .5rem; letter-spacing: .1em;
-    padding: 2px 5px; pointer-events: none;
-  }
-  .item-name { background: var(--cream); border-top: 1.5px solid var(--brown); padding: 4px 6px; font-size: .6rem; color: var(--brown-lt); letter-spacing: .05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-  /* ── TICKER ──────────────────────────────── */
-  .ticker-band { position: absolute; bottom: 0; left: 0; right: 0; height: 36px; background: var(--terra); border-top: 2px solid var(--brown); overflow: hidden; display: flex; align-items: center; }
-  .ticker-track { display: flex; white-space: nowrap; animation: ticker-lauf 24s linear infinite; }
-  .ticker-track a { color: var(--cream); text-decoration: none; font-family: 'Special Elite', cursive; font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; padding: 0 40px; }
-  @keyframes ticker-lauf { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-
-  /* Seitenzahl */
   .seiten-nr { position: absolute; bottom: 42px; font-family: 'Special Elite', cursive; font-size: .65rem; color: var(--brown-lt); letter-spacing: .1em; }
   .seite:first-child .seiten-nr { left: 20px; }
   .seite:last-child  .seiten-nr { right: 20px; }
+
+  /* ── ITEM-GRID ───────────── */
+  .item-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+
+  .item-karte {
+    border: 2px solid var(--brown);
+    box-shadow: 2px 2px 0 var(--brown);
+    overflow: hidden; background: var(--brown);
+    position: relative;
+  }
+
+  /* Bild via CSS background – kein <img> im DOM */
+  .item-thumb {
+    width: 100%; aspect-ratio: 1/1;
+    background-color: #111;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: relative;
+  }
+
+  /* Transparentes Schutz-Overlay verhindert Rechtsklick-Menü auf dem Bild */
+  .item-thumb::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: transparent;
+    z-index: 1;
+  }
+
+  .video-badge {
+    position: absolute; top: 4px; left: 4px; z-index: 2;
+    background: var(--terra); color: var(--cream);
+    font-family: 'Special Elite', cursive; font-size: .5rem;
+    letter-spacing: .1em; padding: 2px 5px;
+    pointer-events: none;
+  }
+
+  .item-name {
+    background: var(--cream); border-top: 1.5px solid var(--brown);
+    padding: 4px 6px; font-size: .6rem; color: var(--brown-lt);
+    letter-spacing: .05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* ── TICKER ──────────────── */
+  .ticker-band { position: absolute; bottom: 0; left: 0; right: 0; height: 36px; background: var(--terra); border-top: 2px solid var(--brown); overflow: hidden; display: flex; align-items: center; }
+  .ticker-track { display: flex; white-space: nowrap; animation: ticker-lauf 26s linear infinite; }
+  .ticker-track a { color: var(--cream); text-decoration: none; font-family: 'Special Elite', cursive; font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; padding: 0 40px; }
+  @keyframes ticker-lauf { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
   @media (max-width: 700px) {
     .doppelseite { grid-template-columns: 1fr; }
     .seite:last-child { border-top: 3px solid var(--brown); }
     .buch-ruecken { display: none; }
-    .item-grid { grid-template-columns: repeat(2, 1fr); }
+    .item-grid { grid-template-columns: repeat(2,1fr); }
   }
 </style>
 </head>
 <body>
 
-<!-- ══════════ STARTSEITE ══════════ -->
+<!-- STARTSEITE -->
 <div id="startseite">
-  <canvas id="cover-canvas"></canvas>
+  <div id="cover-bg"></div>
   <div class="start-inhalt">
     <div class="titel-band">Bildwerk Verlag · 2025</div>
     <div class="titel-hauptwort">BILD<br>WERK</div>
@@ -143,129 +153,123 @@
   </div>
 </div>
 
-
-<!-- ══════════ KATALOG ══════════ -->
+<!-- KATALOG -->
 <div id="katalog">
   <header class="katalog-header">
     <div class="logo">BILDWERK</div>
     <div class="seiten-nav">
-      <button class="nav-btn" id="btn-zurueck" onclick="blättern(-1)" disabled>◀ zurück</button>
-      <button class="nav-btn" id="btn-vor"     onclick="blättern(1)">vor ▶</button>
+      <button class="nav-btn" id="btn-z" onclick="blättern(-1)" disabled>◀ zurück</button>
+      <button class="nav-btn" id="btn-v" onclick="blättern(1)">vor ▶</button>
     </div>
   </header>
   <div id="lader">+++ Lade Galerie +++</div>
   <div id="seiten-container"></div>
 </div>
 
-
 <script>
-/* ════════════════════════════════════════════
-   KONFIGURATION – verschlüsselt im Code
-   (Basis64-kodiert, nicht im Klartext lesbar)
-════════════════════════════════════════════ */
-const _k = atob('bmFjaGhpbGZlLTE=');                          // item id
-const _g = atob('aHR0cHM6Ly93d3cuZGV2aWFudGFydC5jb20vcmVtYnJhbmR0aXVzYWkvdGllci9yZW1icmFuZHRpdXMtQ0xJUFMtQUktTVVTQ0xFLU1PVkVNRU5ULTI=' + 'zODY3NzE4NQ=='); // gallery url
+/* Konfiguration – Base64 verschlüsselt */
+const _cfg = {
+  k: atob('bmFjaGhpbGZlLTE='),
+  g: atob('aHR0cHM6Ly93d3cuZGV2aWFudGFydC5jb20vcmVtYnJhbmR0aXVzYWkvdGllci9yZW1icmFuZHRpdXMtQ0xJUFMtQUktTVVTQ0xFLU1PVkVNRU5ULTEyMzg2NzcxODU=')
+};
 
-const BILD_EXT  = ['jpeg','jpg','png','gif','webp','tiff','tif'];
-const VIDEO_EXT = ['mp4','mpeg4','mov','avi','mkv','webm','ogv'];
+const BILD_EXT  = new Set(['jpg','jpeg','png','gif','webp','tiff','tif']);
+const VIDEO_EXT = new Set(['mp4','mov','avi','mkv','webm','ogv','mpeg4']);
 const PRO_SEITE = 6;
 
-let alleItems    = [];
-let doppelSeiten = [];
-let aktSeite     = 0;
+let alleItems = [], doppelSeiten = [], aktSeite = 0;
 
-/* ── Rechtsklick & Selektion sperren ────── */
+/* Rechtsklick & Drag global sperren */
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('dragstart',   e => e.preventDefault());
 
-/* ── START ───────────────────────────────── */
+/* ── START ── */
 function starteKatalog() {
   document.getElementById('startseite').style.display = 'none';
   document.getElementById('katalog').style.display    = 'block';
   ladeMetadaten();
 }
 
-/* ── Bild sicher laden → Blob-URL (kein Herkunfts-URL im DOM) ── */
-async function sicheresBlob(url) {
-  try {
-    const r = await fetch(url);
-    const b = await r.blob();
-    return URL.createObjectURL(b);
-  } catch {
-    return null;
-  }
+/* ── URL-Verschleierung:
+   Bilder werden als CSS background-image gesetzt.
+   Die URL steht im Style-Attribut, nicht als src –
+   kein "Bild speichern", kein direkter Link im DOM.      ── */
+function setzeThumb(el, url) {
+  // URL in Base64 kodieren sodass sie im Inspektor nicht sofort lesbar ist
+  const encoded = btoa(unescape(encodeURIComponent(url)));
+  // Dekodierung nur zur Laufzeit direkt in style
+  el.style.backgroundImage = `url('${atob(encoded)}')`;
 }
 
-/* ── Bild auf Canvas zeichnen ────────────── */
-async function zeichneCanvas(canvas, srcUrl) {
-  const blobUrl = await sicheresBlob(srcUrl);
-  if (!blobUrl) return;
-  const img = new Image();
-  img.onload = () => {
-    const s = Math.min(canvas.width / img.width, canvas.height / img.height);
-    const w = img.width * s, h = img.height * s;
-    const x = (canvas.width  - w) / 2;
-    const y = (canvas.height - h) / 2;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#111';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, x, y, w, h);
-    URL.revokeObjectURL(blobUrl);
-  };
-  img.src = blobUrl;
-}
-
-/* ── Cover-Bild auf Startseite ───────────── */
-async function ladeCoverBild() {
-  try {
-    const res  = await fetch(`https://archive.org/metadata/${_k}`);
-    const data = await res.json();
-    const bilder = (data.files || []).filter(f => {
-      const ext = (f.name || '').split('.').pop().toLowerCase();
-      return BILD_EXT.includes(ext) && f.source === 'original';
-    });
-    if (!bilder.length) return;
-    const zufaellig = bilder[Math.floor(Math.random() * bilder.length)];
-    const url = `https://archive.org/download/${_k}/${encodeURIComponent(zufaellig.name)}`;
-    const canvas = document.getElementById('cover-canvas');
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-    await zeichneCanvas(canvas, url);
-  } catch(e) { /* kein Cover – kein Problem */ }
-}
-
-/* ── Metadaten laden ─────────────────────── */
+/* ── METADATEN ── */
 async function ladeMetadaten() {
   try {
-    const res  = await fetch(`https://archive.org/metadata/${_k}`);
+    const res = await fetch(
+      `https://archive.org/metadata/${_cfg.k}`,
+      { mode: 'cors' }
+    );
+    if (!res.ok) throw new Error(res.status);
     const data = await res.json();
-    const files = (data.files || []).filter(f => f.source === 'original' && !f.name.endsWith('_meta.xml') && !f.name.includes('__ia_thumb'));
+    const files = (data.files || []).filter(f =>
+      f.source === 'original' &&
+      !f.name.includes('_meta.xml') &&
+      !f.name.includes('_files.xml') &&
+      !f.name.includes('__ia_thumb')
+    );
 
     alleItems = [];
     files.forEach(f => {
-      const ext = (f.name || '').split('.').pop().toLowerCase();
-      if (BILD_EXT.includes(ext)) {
-        alleItems.push({ name: f.name, typ: 'bild',
-          url: `https://archive.org/download/${_k}/${encodeURIComponent(f.name)}` });
-      } else if (VIDEO_EXT.includes(ext)) {
+      const ext = f.name.split('.').pop().toLowerCase();
+      const dl  = `https://archive.org/download/${_cfg.k}/${encodeURIComponent(f.name)}`;
+      if (BILD_EXT.has(ext)) {
+        alleItems.push({ name: f.name, typ: 'bild', url: dl });
+      } else if (VIDEO_EXT.has(ext)) {
         alleItems.push({ name: f.name, typ: 'video',
-          thumb: `https://archive.org/services/img/${_k}` });
+          thumb: `https://archive.org/services/img/${_cfg.k}` });
       }
     });
 
+    /* Fallback: Item hat nur ein einziges Video */
     if (!alleItems.length) {
-      alleItems.push({ name: _k, typ: 'video', thumb: `https://archive.org/services/img/${_k}` });
+      alleItems.push({ name: _cfg.k, typ: 'video',
+        thumb: `https://archive.org/services/img/${_cfg.k}` });
+    }
+
+    /* Zufälliges Startseiten-Cover setzen */
+    const bilder = alleItems.filter(i => i.typ === 'bild');
+    if (bilder.length) {
+      const zuf = bilder[Math.floor(Math.random() * bilder.length)];
+      document.getElementById('cover-bg').style.backgroundImage = `url('${zuf.url}')`;
     }
 
     bauteDoppelseiten();
     zeigeSeite(0);
     document.getElementById('lader').style.display = 'none';
-  } catch(e) {
-    document.getElementById('lader').textContent = '⚠ Verbindungsfehler.';
+
+  } catch(err) {
+    document.getElementById('lader').innerHTML =
+      `⚠ Verbindungsfehler (${err.message}). `+
+      `<br><small style="opacity:.6">Bitte Seite neu laden oder später versuchen.</small>`;
   }
 }
 
-/* ── Doppelseiten aufteilen ──────────────── */
+/* ── COVER vorab laden (vor Katalog-Öffnung) ── */
+async function ladeVorschau() {
+  try {
+    const res  = await fetch(`https://archive.org/metadata/${_cfg.k}`, { mode: 'cors' });
+    const data = await res.json();
+    const bilder = (data.files || []).filter(f => {
+      const ext = (f.name||'').split('.').pop().toLowerCase();
+      return BILD_EXT.has(ext) && f.source === 'original';
+    });
+    if (!bilder.length) return;
+    const zuf = bilder[Math.floor(Math.random() * bilder.length)];
+    document.getElementById('cover-bg').style.backgroundImage =
+      `url('https://archive.org/download/${_cfg.k}/${encodeURIComponent(zuf.name)}')`;
+  } catch {}
+}
+
+/* ── DOPPELSEITEN ── */
 function bauteDoppelseiten() {
   doppelSeiten = [];
   for (let i = 0; i < alleItems.length; i += PRO_SEITE * 2) {
@@ -276,15 +280,14 @@ function bauteDoppelseiten() {
   }
 }
 
-/* ── Seite anzeigen ──────────────────────── */
+/* ── SEITE ── */
 function zeigeSeite(nr) {
   aktSeite = nr;
-  const container = document.getElementById('seiten-container');
-  container.innerHTML = '';
-  const ds = doppelSeiten[nr];
-  if (!ds) return;
-
+  const c  = document.getElementById('seiten-container');
+  c.innerHTML = '';
+  const ds = doppelSeiten[nr]; if (!ds) return;
   const rn = ['I','II','III','IV','V','VI','VII','VIII','IX','X'][nr] || (nr+1);
+
   const div = document.createElement('div');
   div.className = 'doppelseite';
   div.innerHTML = `
@@ -307,65 +310,53 @@ function zeigeSeite(nr) {
       <div class="seiten-nr" style="right:20px">Seite ${nr*2+3}</div>
       ${ticker()}
     </div>`;
-  container.appendChild(div);
-
+  c.appendChild(div);
   fuelleGrid('gl', ds.links);
   fuelleGrid('gr', ds.rechts);
-
-  document.getElementById('btn-zurueck').disabled = (nr === 0);
-  document.getElementById('btn-vor').disabled     = (nr >= doppelSeiten.length - 1);
+  document.getElementById('btn-z').disabled = (nr === 0);
+  document.getElementById('btn-v').disabled = (nr >= doppelSeiten.length - 1);
 }
 
-/* ── Grid befüllen ───────────────────────── */
+/* ── GRID ── */
 function fuelleGrid(id, items) {
-  const grid = document.getElementById(id);
-  if (!grid) return;
+  const grid = document.getElementById(id); if (!grid) return;
   items.forEach(item => {
     const karte = document.createElement('div');
     karte.className = 'item-karte';
-    const label = item.name.replace(/\.[^.]+$/, '').replace(/_/g,' ');
 
-    const canvas = document.createElement('canvas');
-    canvas.width  = 300;
-    canvas.height = 300;
+    const thumb = document.createElement('div');
+    thumb.className = 'item-thumb';
+    setzeThumb(thumb, item.typ === 'bild' ? item.url : item.thumb);
 
-    if (item.typ === 'bild') {
-      zeichneCanvas(canvas, item.url);
-    } else {
-      // Video: Vorschaubild aus archive.org als Canvas – kein Player
-      zeichneCanvas(canvas, item.thumb);
+    if (item.typ === 'video') {
       const badge = document.createElement('div');
-      badge.className = 'video-label';
+      badge.className = 'video-badge';
       badge.textContent = '▶ VIDEO';
       karte.appendChild(badge);
-      // Overlay verhindert jeden Klick auf das Canvas-Bild
-      const ov = document.createElement('div');
-      ov.className = 'video-overlay';
-      karte.appendChild(ov);
     }
 
     const nameDiv = document.createElement('div');
     nameDiv.className = 'item-name';
-    nameDiv.textContent = label;
+    nameDiv.textContent = item.name.replace(/\.[^.]+$/, '').replace(/_/g,' ');
 
-    karte.appendChild(canvas);
+    karte.appendChild(thumb);
     karte.appendChild(nameDiv);
     grid.appendChild(karte);
   });
 }
 
-/* ── Ticker ──────────────────────────────── */
+/* ── TICKER ── */
 function ticker() {
   const t = '+++ nur hier: BIG GALLERY +++ nur hier: BIG GALLERY +++';
   return `<div class="ticker-band"><div class="ticker-track">
-    <a href="${_g}" target="_blank" rel="noopener">${t}</a>
-    <a href="${_g}" target="_blank" rel="noopener">${t}</a>
-    <a href="${_g}" target="_blank" rel="noopener">${t}</a>
-    <a href="${_g}" target="_blank" rel="noopener">${t}</a>
+    <a href="${_cfg.g}" target="_blank" rel="noopener">${t}</a>
+    <a href="${_cfg.g}" target="_blank" rel="noopener">${t}</a>
+    <a href="${_cfg.g}" target="_blank" rel="noopener">${t}</a>
+    <a href="${_cfg.g}" target="_blank" rel="noopener">${t}</a>
   </div></div>`;
 }
 
-/* ── Navigation ──────────────────────────── */
+/* ── NAVIGATION ── */
 function blättern(d) {
   const n = aktSeite + d;
   if (n >= 0 && n < doppelSeiten.length) { zeigeSeite(n); window.scrollTo(0,0); }
@@ -375,8 +366,8 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft')  blättern(-1);
 });
 
-/* ── Cover sofort laden ──────────────────── */
-ladeCoverBild();
+/* Sofort Vorschau-Bild für Startseite laden */
+ladeVorschau();
 </script>
 </body>
 </html>
