@@ -73,8 +73,19 @@
   #lader { text-align: center; padding: 80px 20px; color: var(--cream); font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: .2em; }
 
   /* ── DOPPELSEITE ─────────── */
-  .doppelseite { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 4px solid var(--brown); position: relative; }
-  .seite { background: var(--paper); padding: 24px 20px 16px; position: relative; border-right: 2px solid var(--brown-lt); min-height: 100vh; }
+  /* Buch-Container: zentriert, max Breite wie ein A3-Buch */
+  #seiten-container { display: flex; justify-content: center; background: #2a1a08; padding: 24px 0; }
+
+  .doppelseite {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 3px solid var(--brown);
+    box-shadow: 0 8px 32px rgba(0,0,0,.6);
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+  }
+  .seite { background: var(--paper); padding: 20px 16px 16px; position: relative; border-right: 2px solid var(--brown-lt); }
   .seite:last-child { background: var(--paper-alt); border-right: none; }
   .buch-ruecken { position: absolute; top: 0; bottom: 0; left: 50%; width: 6px; z-index: 10; background: linear-gradient(90deg,rgba(74,44,20,.3),rgba(74,44,20,.05),rgba(74,44,20,.3)); pointer-events: none; }
   .kapitel-kopf { border-bottom: 2px solid var(--brown); margin-bottom: 16px; padding-bottom: 8px; display: flex; align-items: baseline; gap: 12px; }
@@ -85,7 +96,7 @@
   .seite:last-child  .seiten-nr { right: 20px; }
 
   /* ── ITEM-GRID ───────────── */
-  .item-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .item-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
 
   .item-karte {
     border: 2px solid var(--brown);
@@ -136,22 +147,29 @@
     margin-bottom: 12px; flex-shrink: 0;
   }
   .ticker-track { display: flex; white-space: nowrap; animation: ticker-lauf 26s linear infinite; }
-  .ticker-track a { color: var(--cream); text-decoration: none; font-family: 'Special Elite', cursive; font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; padding: 0 40px; }
+  .ticker-track a { color: var(--cream); text-decoration: none; font-family: 'Special Elite', cursive; font-size: .82rem; letter-spacing: .14em; text-transform: uppercase; padding: 0 40px; }
   @keyframes ticker-lauf { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
   /* ── MOBIL ───────────────── */
+  @media (max-width: 980px) {
+    .doppelseite { max-width: 100%; }
+    #seiten-container { padding: 0; }
+  }
   @media (max-width: 700px) {
-    .doppelseite { grid-template-columns: 1fr; }
-    .seite { min-height: unset; padding: 16px 12px 20px; }
+    /* Handy: eine Seite auf einmal, volle Breite */
+    #seiten-container { padding: 0; }
+    .doppelseite { grid-template-columns: 1fr; border-left: none; border-right: none; box-shadow: none; }
+    .seite { padding: 14px 10px 14px; }
     .seite:last-child { border-top: 3px solid var(--brown); border-right: none; }
     .buch-ruecken { display: none; }
     .seiten-nr { display: none; }
     .item-grid { grid-template-columns: repeat(2,1fr); gap: 6px; }
-    .nav-btn { padding: 8px 18px; font-size: .8rem; }
+    .nav-btn { padding: 10px 20px; font-size: .85rem; }
     .katalog-header { padding: 10px 14px; }
     .katalog-header .logo { font-size: 1.1rem; }
     .titel-hauptwort { font-size: clamp(3rem,18vw,5rem); }
     .enter-btn { padding: 14px 28px; font-size: .85rem; }
+    .ticker-track a { font-size: .78rem; }
   }
   @media (max-width: 380px) {
     .item-grid { gap: 4px; }
@@ -194,7 +212,7 @@ const _cfg = {
 
 const BILD_EXT  = new Set(['jpg','jpeg','png','gif','webp','tiff','tif']);
 const VIDEO_EXT = new Set(['mp4','mov','avi','mkv','webm','ogv','mpeg4']);
-const PRO_SEITE = 6;
+const PRO_SEITE = 4;
 
 let alleItems = [], doppelSeiten = [], aktSeite = 0;
 
