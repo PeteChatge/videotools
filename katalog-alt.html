@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BILDWERK – Katalog Nr. 1</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap');
+
+  :root {
+    --paper:     #f5eed6;
+    --paper-alt: #f0e6c8;
+    --terra:     #c4603a;
+    --terra-dk:  #8b3a1e;
+    --brown:     #4a2c14;
+    --brown-lt:  #7a5230;
+    --cream:     #faf6ea;
+    --ink:       #1e0e04;
+    --accent:    #d4a535;
+    --frame:     3px solid var(--brown);
+    --shadow:    4px 4px 0 var(--brown);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #2a1a08; font-family: 'Courier Prime', monospace; color: var(--ink); min-height: 100vh; }
+
+  /* ── STARTSEITE ─────────────────────────── */
+  #startseite {
+    min-height: 100vh; background: var(--paper);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px 20px; position: relative; overflow: hidden;
+  }
+  #startseite::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(74,44,20,.06) 29px),
+      repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(74,44,20,.04) 29px);
+    pointer-events: none;
+  }
+  .titel-band {
+    background: var(--terra); color: var(--cream);
+    padding: 10px 40px; font-family: 'Special Elite', cursive;
+    font-size: .75rem; letter-spacing: .25em; text-transform: uppercase;
+    margin-bottom: 12px; border: 2px solid var(--brown); box-shadow: var(--shadow);
+  }
+  .titel-hauptwort {
+    font-family: 'Playfair Display', serif; font-size: clamp(3.5rem,10vw,7rem);
+    font-weight: 700; line-height: .9; color: var(--brown); text-align: center; letter-spacing: -.03em;
+  }
+  .titel-untertitel {
+    font-family: 'Special Elite', cursive; font-size: .9rem;
+    color: var(--terra-dk); letter-spacing: .15em; text-transform: uppercase; margin: 14px 0 40px;
+  }
+  .start-box {
+    background: var(--cream); border: var(--frame); box-shadow: var(--shadow);
+    padding: 28px 36px; max-width: 480px; width: 100%; position: relative;
+  }
+  .start-box::before {
+    content: '▶ AUSWAHL'; position: absolute; top: -12px; left: 16px;
+    background: var(--terra); color: var(--cream); font-family: 'Special Elite', cursive;
+    font-size: .7rem; letter-spacing: .2em; padding: 2px 10px; border: 2px solid var(--brown);
+  }
+  .option-row {
+    display: flex; align-items: flex-start; gap: 14px;
+    margin-bottom: 18px; padding-bottom: 18px;
+    border-bottom: 1px dashed var(--brown-lt); cursor: pointer;
+  }
+  .option-row:last-of-type { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .option-row input[type="radio"] {
+    appearance: none; width: 20px; height: 20px;
+    border: 2px solid var(--brown); background: var(--paper);
+    cursor: pointer; flex-shrink: 0; margin-top: 3px; position: relative; transition: background .15s;
+  }
+  .option-row input[type="radio"]:checked { background: var(--terra); }
+  .option-row input[type="radio"]:checked::after {
+    content: '✕'; position: absolute; inset: 0; font-size: .75rem; color: var(--cream);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .option-info { flex: 1; }
+  .option-titel { font-weight: 700; font-size: .95rem; color: var(--brown); }
+  .option-meta  { font-size: .75rem; color: var(--brown-lt); margin-top: 3px; line-height: 1.5; }
+  .option-preis { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--terra); white-space: nowrap; align-self: center; }
+  .start-btn {
+    display: block; width: 100%; margin-top: 24px; padding: 14px;
+    background: var(--terra); color: var(--cream); border: 2px solid var(--brown); box-shadow: var(--shadow);
+    font-family: 'Special Elite', cursive; font-size: 1rem; letter-spacing: .15em;
+    text-transform: uppercase; cursor: pointer; transition: transform .1s, box-shadow .1s;
+  }
+  .start-btn:hover  { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--brown); }
+  .start-btn:active { transform: translate(4px,4px); box-shadow: none; }
+  .impressum { margin-top: 28px; font-size: .65rem; color: var(--brown-lt); text-align: center; letter-spacing: .08em; line-height: 1.8; }
+
+  /* ── KATALOG-HEADER ─────────────────────── */
+  #katalog { display: none; }
+  .katalog-header {
+    background: var(--terra); color: var(--cream);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 24px; border-bottom: 3px solid var(--brown);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .katalog-header .logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; }
+  .katalog-header nav { display: flex; gap: 20px; font-family: 'Special Elite', cursive; font-size: .7rem; letter-spacing: .15em; text-transform: uppercase; }
+  .katalog-header nav a { color: var(--cream); text-decoration: none; opacity: .8; cursor: pointer; }
+  .katalog-header nav a:hover { opacity: 1; }
+
+  /* ── DOPPELSEITE ────────────────────────── */
+  .doppelseite { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; border-bottom: 4px solid var(--brown); position: relative; }
+  .seite { background: var(--paper); padding: 32px 28px; position: relative; border-right: 2px solid var(--brown-lt); }
+  .seite:last-child { background: var(--paper-alt); border-right: none; }
+  .buch-ruecken {
+    position: absolute; top: 0; bottom: 0; left: 50%; width: 6px; z-index: 10;
+    background: linear-gradient(90deg, rgba(74,44,20,.3), rgba(74,44,20,.05), rgba(74,44,20,.3));
+    pointer-events: none;
+  }
+  .seiten-nr { position: absolute; bottom: 16px; font-family: 'Special Elite', cursive; font-size: .65rem; color: var(--brown-lt); letter-spacing: .1em; }
+  .seite:first-child .seiten-nr { left: 28px; }
+  .seite:last-child  .seiten-nr { right: 28px; }
+  .kapitel-kopf { border-bottom: 2px solid var(--brown); margin-bottom: 24px; padding-bottom: 10px; display: flex; align-items: baseline; gap: 14px; }
+  .kapitel-nr   { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: var(--terra); line-height: 1; }
+  .kapitel-titel { font-family: 'Special Elite', cursive; font-size: .85rem; letter-spacing: .12em; text-transform: uppercase; color: var(--brown); }
+
+  /* ── ARTIKEL ────────────────────────────── */
+  .artikel { margin-bottom: 28px; }
+  .artikel-frame { border: var(--frame); box-shadow: var(--shadow); overflow: hidden; background: var(--brown); }
+
+  /* ── BILD (kein Clip) ───────────────────── */
+  .bild-container { position: relative; overflow: hidden; display: block; background: #1e0e04; }
+  .bild-container img { display: block; width: 100%; height: auto; }
+
+  /* ── VIDEO-CONTAINER ────────────────────── */
+  .video-container { position: relative; cursor: pointer; overflow: hidden; display: block; background: #1e0e04; }
+  .video-container img { display: block; width: 100%; height: auto; transition: opacity .2s; }
+
+  .embed-wrap { display: none; position: relative; width: 100%; }
+  .embed-wrap.r-1-1 { padding-bottom: 100%; }
+  .embed-wrap.r-4-3 { padding-bottom: 75%; }
+  .embed-wrap.r-3-4 { padding-bottom: 133.33%; }
+  .embed-wrap.r-5-3 { padding-bottom: 60%; }
+  .embed-wrap.r-3-5 { padding-bottom: 166.66%; }
+  .embed-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+
+  .video-container.playing img       { display: none; }
+  .video-container.playing .embed-wrap { display: block; }
+  .video-container.playing .play-overlay { opacity: 0; pointer-events: none; }
+  .video-container.playing .stop-badge  { display: block; }
+
+  .play-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(74,44,20,.22); transition: opacity .2s;
+  }
+  .play-btn-circle {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--terra); border: 3px solid var(--cream);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 2px 2px 0 var(--brown); transition: transform .15s;
+  }
+  .play-btn-circle svg { fill: var(--cream); width: 22px; height: 22px; margin-left: 4px; }
+  .video-container:hover .play-btn-circle { transform: scale(1.1); }
+
+  /* Video-Badge */
+  .video-badge {
+    position: absolute; top: 8px; left: 8px;
+    background: var(--terra); color: var(--cream);
+    font-family: 'Special Elite', cursive; font-size: .6rem; letter-spacing: .12em;
+    padding: 3px 8px; border: 1.5px solid var(--cream);
+  }
+  .stop-badge {
+    display: none; position: absolute; top: 8px; right: 8px;
+    background: var(--terra-dk); color: var(--cream);
+    font-family: 'Special Elite', cursive; font-size: .6rem; letter-spacing: .1em;
+    padding: 3px 8px; border: 1.5px solid var(--cream); cursor: pointer; z-index: 5;
+  }
+
+  /* ── ARTIKEL-INFO ───────────────────────── */
+  .artikel-info { background: var(--cream); border-top: var(--frame); padding: 10px 12px; }
+  .artikel-kopfzeile { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+  .artikel-titel { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--brown); line-height: 1.2; flex: 1; }
+  .artikel-preis { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--terra); white-space: nowrap; }
+  .artikel-meta  { font-size: .68rem; color: var(--brown-lt); line-height: 1.6; margin-bottom: 8px; }
+  .artikel-text  { font-size: .78rem; line-height: 1.65; color: var(--ink); margin-bottom: 10px; }
+
+  .loop-row { display: flex; align-items: center; gap: 8px; }
+  .loop-check {
+    appearance: none; width: 16px; height: 16px;
+    border: 2px solid var(--brown); background: var(--paper);
+    cursor: pointer; position: relative; flex-shrink: 0; transition: background .15s;
+  }
+  .loop-check:checked { background: var(--terra-dk); }
+  .loop-check:checked::after { content: '✕'; position: absolute; inset: 0; font-size: .6rem; color: var(--cream); display: flex; align-items: center; justify-content: center; }
+  .loop-label { font-size: .65rem; text-transform: uppercase; letter-spacing: .12em; color: var(--brown-lt); cursor: pointer; font-family: 'Special Elite', cursive; }
+
+  .bestell-btn {
+    display: none; margin-top: 10px; width: 100%; padding: 7px;
+    background: var(--terra); color: var(--cream);
+    border: 1.5px solid var(--brown); box-shadow: 2px 2px 0 var(--brown);
+    font-family: 'Special Elite', cursive; font-size: .7rem; letter-spacing: .1em;
+    text-transform: uppercase; cursor: pointer; transition: transform .1s, box-shadow .1s;
+  }
+  .bestell-btn:hover { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--brown); }
+  body.bestell-modus .bestell-btn { display: block; }
+
+  .warenkorb-badge {
+    display: none; background: var(--accent); color: var(--brown);
+    border: 1.5px solid var(--brown); font-size: .65rem; padding: 1px 6px;
+    font-family: 'Special Elite', cursive; margin-left: 8px;
+  }
+  body.bestell-modus .warenkorb-badge { display: inline; }
+
+  @media (max-width: 700px) {
+    .doppelseite { grid-template-columns: 1fr; }
+    .seite:last-child { border-top: 3px solid var(--brown); }
+    .buch-ruecken { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ STARTSEITE ══════════ -->
+<div id="startseite">
+  <div class="titel-band">Bildwerk Verlag · Ausgabe 2025</div>
+  <div class="titel-hauptwort">BILD<br>WERK</div>
+  <div class="titel-untertitel">Fotografie &amp; Bewegtbild · Katalog Nr. 1</div>
+
+  <div class="start-box">
+    <label class="option-row">
+      <input type="radio" name="modus" value="lesen" checked>
+      <div class="option-info">
+        <div class="option-titel">Nur lesen &amp; ansehen</div>
+        <div class="option-meta">Freier Zugang · Clips starten auf Antippen · Vorschau-Qualität</div>
+      </div>
+      <div class="option-preis">€ 0,–</div>
+    </label>
+    <label class="option-row">
+      <input type="radio" name="modus" value="hd">
+      <div class="option-info">
+        <div class="option-titel">HD Download</div>
+        <div class="option-meta">Bis 4K · Formate 1:1, 4:3, 3:4, 5:3, 3:5 · Einzellizenzen</div>
+      </div>
+      <div class="option-preis">€ 12,–</div>
+    </label>
+    <label class="option-row">
+      <input type="radio" name="modus" value="paket">
+      <div class="option-info">
+        <div class="option-titel">Gesamtpaket Katalog Nr. 1</div>
+        <div class="option-meta">Alle Bilder &amp; Clips · Unbegrenzte Nutzung · Print-Rechte</div>
+      </div>
+      <div class="option-preis">€ 49,–</div>
+    </label>
+    <button class="start-btn" onclick="starteKatalog()">▶ &nbsp; Katalog aufschlagen</button>
+    <div class="impressum">Eigenes Material · Alle Rechte vorbehalten · BILDWERK 2025<br>Zahlungsabwicklung über sichere Bezahlrouten</div>
+  </div>
+</div>
+
+
+<!-- ══════════ KATALOG ══════════ -->
+<div id="katalog">
+  <header class="katalog-header">
+    <div class="logo">BILDWERK</div>
+    <nav>
+      <a onclick="toggleWarenkorb()">Warenkorb <span class="warenkorb-badge" id="wk-count">0</span></a>
+    </nav>
+  </header>
+
+  <!-- ═══ DOPPELSEITE – 4 Items ═══ -->
+  <div class="doppelseite">
+    <div class="buch-ruecken"></div>
+
+    <!-- LINKE SEITE: Bild 1 + Bild 2 -->
+    <div class="seite">
+      <div class="kapitel-kopf">
+        <div class="kapitel-nr">I</div>
+        <div class="kapitel-titel">Bilder &amp; Clips</div>
+      </div>
+
+      <!-- Item 1 · BILD · frame1_202602 · Format 4:3 -->
+      <div class="artikel">
+        <div class="artikel-frame">
+          <div class="bild-container">
+            <img src="https://archive.org/services/img/frame1_202602"
+                 alt="Frame 1"
+                 style="aspect-ratio:4/3; object-fit:cover;">
+          </div>
+          <div class="artikel-info">
+            <div class="artikel-kopfzeile">
+              <div class="artikel-titel">Frame 1</div>
+              <div class="artikel-preis">€ 12,–</div>
+            </div>
+            <div class="artikel-meta">Fotografie · Format 4:3 · Hohe Auflösung</div>
+            <div class="artikel-text">Standbild. Ihr Text hier.</div>
+            <button class="bestell-btn" onclick="inWarenkorb(this,'Frame 1','€ 12,–')">In den Warenkorb</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 2 · BILD · frame2_202602 · Format 4:3 -->
+      <div class="artikel">
+        <div class="artikel-frame">
+          <div class="bild-container">
+            <img src="https://archive.org/services/img/frame2_202602"
+                 alt="Frame 2"
+                 style="aspect-ratio:4/3; object-fit:cover;">
+          </div>
+          <div class="artikel-info">
+            <div class="artikel-kopfzeile">
+              <div class="artikel-titel">Frame 2</div>
+              <div class="artikel-preis">€ 12,–</div>
+            </div>
+            <div class="artikel-meta">Fotografie · Format 4:3 · Hohe Auflösung</div>
+            <div class="artikel-text">Standbild. Ihr Text hier.</div>
+            <button class="bestell-btn" onclick="inWarenkorb(this,'Frame 2','€ 12,–')">In den Warenkorb</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="seiten-nr">Seite 2</div>
+    </div>
+
+    <!-- RECHTE SEITE: Bild 3 + Video -->
+    <div class="seite">
+      <div class="kapitel-kopf" style="flex-direction:row-reverse; justify-content:flex-start;">
+        <div class="kapitel-nr" style="color:var(--terra-dk)">I</div>
+        <div class="kapitel-titel">Fortsetzung</div>
+      </div>
+
+      <!-- Item 3 · BILD · frame3_202602 · Format 4:3 -->
+      <div class="artikel">
+        <div class="artikel-frame">
+          <div class="bild-container">
+            <img src="https://archive.org/services/img/frame3_202602"
+                 alt="Frame 3"
+                 style="aspect-ratio:4/3; object-fit:cover;">
+          </div>
+          <div class="artikel-info">
+            <div class="artikel-kopfzeile">
+              <div class="artikel-titel">Frame 3</div>
+              <div class="artikel-preis">€ 12,–</div>
+            </div>
+            <div class="artikel-meta">Fotografie · Format 4:3 · Hohe Auflösung</div>
+            <div class="artikel-text">Standbild. Ihr Text hier.</div>
+            <button class="bestell-btn" onclick="inWarenkorb(this,'Frame 3','€ 12,–')">In den Warenkorb</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Item 4 · VIDEO · female_first · Format 4:3 -->
+      <div class="artikel">
+        <div class="artikel-frame">
+          <div class="video-container"
+               data-archive="female_first"
+               data-ratio="r-4-3"
+               onclick="toggleClip(this)">
+            <img src="https://archive.org/services/img/female_first"
+                 alt="A Female Hammer Thrower in Love"
+                 style="aspect-ratio:4/3; object-fit:cover;">
+            <div class="embed-wrap r-4-3"></div>
+            <div class="play-overlay">
+              <div class="play-btn-circle"><svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14"/></svg></div>
+            </div>
+            <div class="video-badge">▶ VIDEO</div>
+            <div class="stop-badge" onclick="event.stopPropagation(); stoppeClip(this.parentElement)">■ STOP</div>
+          </div>
+          <div class="artikel-info">
+            <div class="artikel-kopfzeile">
+              <div class="artikel-titel">A Female Hammer Thrower in Love</div>
+              <div class="artikel-preis">€ 12,–</div>
+            </div>
+            <div class="artikel-meta">Bewegtbild · Format 4:3 · 0:20 min</div>
+            <div class="artikel-text">Antippen zum Abspielen.</div>
+            <div class="loop-row">
+              <input type="checkbox" class="loop-check" id="loop-v1" onchange="aktualisiereLoop(this)">
+              <label class="loop-label" for="loop-v1">Clip wiederholen</label>
+            </div>
+            <button class="bestell-btn" onclick="inWarenkorb(this,'A Female Hammer Thrower in Love','€ 12,–')">In den Warenkorb</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="seiten-nr" style="right:28px">Seite 3</div>
+    </div>
+  </div>
+
+</div><!-- /katalog -->
+
+
+<script>
+/* ── START ───────────────────────────────── */
+let warenkorb = [];
+
+function starteKatalog() {
+  const checked = document.querySelector('input[name="modus"]:checked');
+  if (checked && checked.value !== 'lesen') document.body.classList.add('bestell-modus');
+  document.getElementById('startseite').style.display = 'none';
+  document.getElementById('katalog').style.display    = 'block';
+}
+
+/* ── CLIP-LOGIK (archive.org) ────────────── */
+function archiveURL(id) {
+  return `https://archive.org/embed/${id}?autoplay=1&start=0`;
+}
+
+function toggleClip(container) {
+  if (container.classList.contains('playing')) {
+    stoppeClip(container);
+    return;
+  }
+  // Andere laufende Clips stoppen
+  document.querySelectorAll('.video-container.playing').forEach(stoppeClip);
+
+  const archiveId = container.dataset.archive;
+  const wrap      = container.querySelector('.embed-wrap');
+
+  const iframe = document.createElement('iframe');
+  iframe.src = archiveURL(archiveId);
+  iframe.allow = 'autoplay; fullscreen';
+  iframe.allowFullscreen = true;
+  wrap.innerHTML = '';
+  wrap.appendChild(iframe);
+  container.classList.add('playing');
+}
+
+function stoppeClip(container) {
+  container.querySelector('.embed-wrap').innerHTML = '';
+  container.classList.remove('playing');
+}
+
+function aktualisiereLoop(checkbox) {
+  // archive.org unterstützt kein Loop-Parameter – Neustart simuliert Schleife
+  const container = checkbox.closest('.artikel').querySelector('.video-container');
+  if (!container || !container.classList.contains('playing')) return;
+  if (checkbox.checked) {
+    const iframe = container.querySelector('.embed-wrap iframe');
+    if (iframe) {
+      // Beim Ende neu laden – einfachste Lösung: iframe src neu setzen
+      iframe.src = archiveURL(container.dataset.archive);
+    }
+  }
+}
+
+/* ── WARENKORB ───────────────────────────── */
+function inWarenkorb(btn, name, preis) {
+  if (!warenkorb.find(i => i.name === name)) warenkorb.push({ name, preis });
+  document.getElementById('wk-count').textContent = warenkorb.length;
+  btn.textContent = '✕ Vorgemerkt';
+  btn.style.background = 'var(--brown)';
+  zeigeToast(`„${name}" vorgemerkt.`);
+}
+
+function toggleWarenkorb() {
+  if (!warenkorb.length) { zeigeToast('Warenkorb ist leer.'); return; }
+  alert('Warenkorb:\n\n' + warenkorb.map(i => `· ${i.name}  ${i.preis}`).join('\n') + '\n\n(Bezahlroutine hier einbinden)');
+}
+
+/* ── TOAST ───────────────────────────────── */
+function zeigeToast(text) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div'); t.id = 'toast';
+    Object.assign(t.style, {
+      position:'fixed', bottom:'28px', left:'50%', transform:'translateX(-50%)',
+      background:'var(--brown)', color:'var(--cream)', padding:'10px 22px',
+      fontFamily:"'Special Elite', cursive", fontSize:'.75rem',
+      letterSpacing:'.1em', border:'2px solid var(--terra)',
+      boxShadow:'3px 3px 0 var(--terra-dk)', zIndex:'9999',
+      opacity:'0', transition:'opacity .25s', whiteSpace:'nowrap', pointerEvents:'none'
+    });
+    document.body.appendChild(t);
+  }
+  t.textContent = text; t.style.opacity = '1';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => { t.style.opacity = '0'; }, 2800);
+}
+
+/* ── TASTATUR: Esc = Stop ────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.video-container.playing').forEach(stoppeClip);
+});
+</script>
+</body>
+</html>
