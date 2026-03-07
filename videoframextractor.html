@@ -119,6 +119,31 @@
         .summary p { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
 
         canvas { display: none; }
+
+        .upload-row { display: flex; gap: 14px; }
+        .upload-row .upload-area { flex: 1; padding: 32px 20px; }
+        .music-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px 24px; display: none; }
+        .music-panel.show { display: block; }
+        .music-drop {
+            border: 2px dashed var(--border); border-radius: 10px;
+            padding: 22px; text-align: center; cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            background: var(--surface2); margin-bottom: 14px;
+        }
+        .music-drop:hover, .music-drop.drag { border-color: var(--accent2); background: #1f1a24; }
+        .music-drop .md-icon { font-size: 28px; display: block; margin-bottom: 6px; }
+        .music-drop .md-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+        .music-drop .md-hint { font-size: 12px; color: var(--muted); }
+        .music-info { background: var(--surface2); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .music-info .mi-icon { font-size: 22px; }
+        .music-info .mi-name { font-size: 13px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .music-info .mi-size { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+        .music-info .mi-rm { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 2px 6px; border-radius: 4px; transition: color 0.15s; }
+        .music-info .mi-rm:hover { color: var(--accent2); }
+        .music-preview { display: flex; align-items: center; gap: 10px; }
+        .btn-preview { padding: 8px 18px; border-radius: 8px; border: 1.5px solid var(--accent2); background: rgba(247,106,138,0.1); color: var(--accent2); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.18s; }
+        .btn-preview:hover { background: rgba(247,106,138,0.2); }
+        .preview-hint { font-size: 12px; color: var(--muted); }
         @media (max-width: 580px) { .action-row { flex-direction: column; } .btn { min-width: 100%; } .upload-area { padding: 32px 20px; } }
     </style>
 </head>
@@ -140,12 +165,20 @@
         </div>
     </div>
 
-    <div class="upload-area" id="uploadArea">
-        <span class="icon">&#128193;</span>
-        <div class="title">Videos hierher ziehen oder klicken</div>
-        <div class="hint">Bis zu 10 Videos gleichzeitig &middot; MP4, MOV, WebM, AVI, MKV</div>
+    <div class="upload-row">
+        <div class="upload-area" id="uploadArea">
+            <span class="icon">&#127909;</span>
+            <div class="title">Videos</div>
+            <div class="hint">Bis zu 10 &middot; MP4, MOV, WebM, AVI, MKV</div>
+        </div>
+        <div class="upload-area" id="musicUploadArea">
+            <span class="icon">&#127925;</span>
+            <div class="title">Musik (optional)</div>
+            <div class="hint">MP3, AAC, WAV &middot; Fade-in 1s &middot; Fade-out 2s &middot; 60%</div>
+        </div>
     </div>
     <input type="file" id="fileInput" accept="video/*" multiple>
+    <input type="file" id="musicInput" accept="audio/*" style="display:none">
 
     <div class="panel">
         <div class="panel-label">Frame-Intervall</div>
@@ -186,6 +219,27 @@
                 <input type="checkbox" id="reverseBrowserToggle">
                 <span class="slider"></span>
             </label>
+        </div>
+    </div>
+
+    <!-- Musik-Panel (nur sichtbar wenn includeClipToggle aktiv) -->
+    <div class="music-panel" id="musicPanel">
+        <div class="panel-label">&#127925; Musik zum Original-Clip hinzuf&uuml;gen</div>
+        <div class="music-drop" id="musicDrop">
+            <span class="md-icon">&#127925;</span>
+            <div class="md-title">MP3 hierher ziehen oder klicken</div>
+            <div class="md-hint">Wird auf alle Clips angewendet &middot; Fade-in 1s &middot; Fade-out 2s &middot; Lautst&auml;rke 60%</div>
+        </div>
+        <input type="file" id="musicInput" accept="audio/*" style="display:none">
+        <div class="music-info" id="musicInfo" style="display:none">
+            <span class="mi-icon">&#127925;</span>
+            <span class="mi-name" id="musicName">–</span>
+            <span class="mi-size" id="musicSize">–</span>
+            <button class="mi-rm" id="musicRemove">&#10005;</button>
+        </div>
+        <div class="music-preview" id="musicPreview" style="display:none">
+            <button class="btn-preview" id="previewBtn">&#9654; Vorschau abspielen</button>
+            <span class="preview-hint">Video + Musik gleichzeitig &mdash; so klingt es in etwa</span>
         </div>
     </div>
 
@@ -404,6 +458,68 @@ echo Alle Clips wurden umgekehrt.
 pause
 `);
 
+const MUSIC_MAC = enc.encode(
+`#!/bin/bash
+# musik_mix_mac.sh - Musik zu Videoclips hinzufuegen
+# Fade-in: 1s, Fade-out: 2s, Lautstaerke: 60%
+# Mac/Linux: ./musik_mix_mac.sh musik.mp3
+# Android  : bash /sdcard/Download/trimmen/musik_mix_mac.sh /sdcard/Download/CLIPS musik.mp3
+
+CLIP_DIR="\${1:-\$(pwd)}"
+MUSIC="\${2:-musik.mp3}"
+[ -f "\$MUSIC" ] || { echo "Fehler: \$MUSIC nicht gefunden."; exit 1; }
+
+mix_clip() {
+    local f="\$1" out="\$2"
+    local dur=\$(ffprobe -v error -show_entries format=duration -of csv=p=0 "\$f")
+    local fade=\$(echo "\$dur - 2" | bc)
+    ffmpeg -i "\$f" -i "\$MUSIC" \
+      -filter_complex "[1:a]volume=0.6,afade=t=in:st=0:d=1,afade=t=out:st=\${fade}:d=2[a]" \
+      -map 0:v -map "[a]" -c:v copy -c:a aac -shortest "\$out" -y 2>/dev/null
+}
+
+if [ -d "/data/data/com.termux" ] || [ -n "\$TERMUX_VERSION" ]; then
+    WORK_DIR="\$HOME/musik_work"; mkdir -p "\$WORK_DIR"
+    echo "Android/Termux. Clips: \$CLIP_DIR  Musik: \$MUSIC"
+    for f in "\$CLIP_DIR"/*.mp4 "\$CLIP_DIR"/*.mov "\$CLIP_DIR"/*.webm "\$CLIP_DIR"/*.mkv; do
+        [ -f "\$f" ] || continue
+        BASE="\$(basename "\$f")"; OUT="\${BASE%.*}_musik.mp4"
+        echo "Mische: \$BASE"
+        mix_clip "\$f" "\$WORK_DIR/\$OUT"
+        cp "\$WORK_DIR/\$OUT" "\$CLIP_DIR/\$OUT"; rm "\$WORK_DIR/\$OUT"
+        echo "Fertig: \$OUT"
+    done
+    rmdir "\$WORK_DIR" 2>/dev/null
+else
+    for f in "\$CLIP_DIR"/*.mp4 "\$CLIP_DIR"/*.mov "\$CLIP_DIR"/*.webm "\$CLIP_DIR"/*.mkv; do
+        [ -f "\$f" ] || continue
+        OUT="\${f%.*}_musik.mp4"
+        mix_clip "\$f" "\$OUT"
+        echo "Fertig: \$OUT"
+    done
+fi
+echo "Alle Clips fertig."
+`);
+
+const MUSIC_WIN = enc.encode(
+`@echo off
+REM musik_mix_windows.bat - Musik zu Videoclips hinzufuegen
+REM Fade-in: 1s, Fade-out: 2s, Lautstaerke: 60%
+REM Aufruf: musik_mix_windows.bat musik.mp3
+
+set MUSIC=%1
+if "%MUSIC%"=="" set MUSIC=musik.mp3
+
+for %%f in (*.mp4 *.mov *.webm *.mkv) do (
+    ffmpeg -i "%%f" -i "%MUSIC%" ^
+      -filter_complex "[1:a]volume=0.6,afade=t=in:st=0:d=1,afade=t=out:st=9999:d=2[a]" ^
+      -map 0:v -map "[a]" -c:v copy -c:a aac -shortest "%%~nf_musik.mp4" -y
+    echo Fertig: %%~nf_musik.mp4
+)
+echo Alle Clips fertig.
+pause
+`);
+
 // ═══════════════════════════════════════════════════════════
 // App
 // ═══════════════════════════════════════════════════════════
@@ -481,6 +597,8 @@ function addFiles(files) {
     });
     renderList();
     fileInput.value = '';
+    // Vorschau-Button zeigen wenn Musik bereits geladen
+    if (musicFile) musicPreview.style.display = 'flex';
 }
 
 function renderList() {
@@ -540,15 +658,22 @@ startBtn.addEventListener('click', async () => {
         try {
             const baseName = entry.file.name.replace(/\.[^/.]+$/, '');
             const ts = timeStamp();
+            const withMusic = includeClipToggle.checked && musicFile && canTrimInBrowser;
+
+            // Frames extrahieren
             const frames = await extractFrames(entry.file, interval, msg => { progDetail.textContent = msg; });
             frames.forEach(f => allFiles.push({ name: baseName + '/frames/' + f.name, data: f.data }));
             totalFrames += frames.length;
 
-            // Clip im Browser trimmen (erster Frame weg → WebM)
+            // Clip trimmen (erster Frame weg)
             if (trimBrowserToggle.checked && canTrimInBrowser) {
-                progDetail.textContent = 'Trimme Clip im Browser ...';
-                const trimmed = await trimFirstFrameBrowser(entry.file, msg => { progDetail.textContent = msg; });
+                progDetail.textContent = 'Trimme Clip ...';
+                let trimmed = await trimFirstFrameBrowser(entry.file, msg => { progDetail.textContent = msg; });
                 if (trimmed) {
+                    if (withMusic) {
+                        progDetail.textContent = 'Mische Musik in getrimmten Clip ...';
+                        trimmed = await mixAudioIntoWebm(trimmed, musicFile, msg => { progDetail.textContent = msg; }) || trimmed;
+                    }
                     allFiles.push({ name: baseName + '/' + baseName + '_trimmed.webm', data: trimmed });
                 }
             }
@@ -556,8 +681,12 @@ startBtn.addEventListener('click', async () => {
             // Clip umkehren (Reverse)
             if (reverseBrowserToggle.checked && canTrimInBrowser) {
                 progDetail.textContent = 'Kehre Clip um (Reverse) ...';
-                const reversed = await reverseClipBrowser(entry.file, msg => { progDetail.textContent = msg; });
+                let reversed = await reverseClipBrowser(entry.file, msg => { progDetail.textContent = msg; });
                 if (reversed) {
+                    if (withMusic) {
+                        progDetail.textContent = 'Mische Musik in Reverse-Clip ...';
+                        reversed = await mixAudioIntoWebm(reversed, musicFile, msg => { progDetail.textContent = msg; }) || reversed;
+                    }
                     allFiles.push({ name: baseName + '/' + baseName + '_reversed.webm', data: reversed });
                 }
             }
@@ -565,9 +694,16 @@ startBtn.addEventListener('click', async () => {
             // Original-Clip + Endframe optional beilegen
             if (includeClipToggle.checked) {
                 progDetail.textContent = 'Original-Clip wird gepackt ...';
-                const clipData = await entry.file.arrayBuffer();
-                const ext = entry.file.name.split('.').pop() || 'mp4';
-                allFiles.push({ name: baseName + '/clip_' + ts + '.' + ext, data: new Uint8Array(clipData) });
+                let clipData;
+                if (withMusic) {
+                    progDetail.textContent = 'Mische Musik in Original-Clip ...';
+                    const mixed = await mixAudioIntoVideo(entry.file, musicFile, msg => { progDetail.textContent = msg; });
+                    clipData = mixed || new Uint8Array(await entry.file.arrayBuffer());
+                } else {
+                    clipData = new Uint8Array(await entry.file.arrayBuffer());
+                }
+                const ext = withMusic ? 'webm' : (entry.file.name.split('.').pop() || 'mp4');
+                allFiles.push({ name: baseName + '/clip_' + ts + '.' + ext, data: clipData });
 
                 // Letztes Frame als PNG
                 const lastFrame = await extractSingleFrame(entry.file, 'last');
@@ -588,9 +724,11 @@ startBtn.addEventListener('click', async () => {
     // Trimm-Skripte immer beilegen
     allFiles.push({ name: 'trimmen/trim_mac.sh',      data: TRIM_MAC });
     allFiles.push({ name: 'trimmen/trim_windows.bat', data: TRIM_WIN });
-    allFiles.push({ name: 'trimmen/reverse_mac.sh',   data: REVERSE_MAC });
-    allFiles.push({ name: 'trimmen/reverse_windows.bat', data: REVERSE_WIN });
-    allFiles.push({ name: 'trimmen/ANLEITUNG.txt',    data: TRIM_README });
+    allFiles.push({ name: 'trimmen/reverse_mac.sh',      data: REVERSE_MAC });
+    allFiles.push({ name: 'trimmen/reverse_windows.bat',  data: REVERSE_WIN });
+    allFiles.push({ name: 'trimmen/musik_mix_mac.sh',     data: MUSIC_MAC });
+    allFiles.push({ name: 'trimmen/musik_mix_windows.bat',data: MUSIC_WIN });
+    allFiles.push({ name: 'trimmen/ANLEITUNG.txt',        data: TRIM_README });
 
     progLabel.textContent = 'ZIP wird erstellt ...';
     progDetail.textContent = allFiles.length + ' Dateien werden gepackt ...';
@@ -751,6 +889,203 @@ function trimFirstFrameBrowser(file, onProgress) {
     });
 }
 
+// ═══════════════════════════════════════════════════════════
+// AUDIO MIXING – MP3 in Video mischen (Web Audio API)
+// Funktioniert in Chrome, Firefox, Safari, iOS Safari
+// ═══════════════════════════════════════════════════════════
+
+// Hilfsfunktion: AudioBuffer aus File dekodieren
+async function decodeAudioFile(file) {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ab = await file.arrayBuffer();
+    return { ctx, buffer: await ctx.decodeAudioData(ab) };
+}
+
+// Musik in ein bereits erzeugtes WebM (Uint8Array, kein Audio) mischen
+// Gibt neues WebM mit Audio-Track zurück
+async function mixAudioIntoWebm(videoData, audioFile, onProgress) {
+    try {
+        // Video als Blob → MediaElement → Video-Stream
+        const videBlob = new Blob([videoData], { type: 'video/webm' });
+        const videoUrl = URL.createObjectURL(videBlob);
+        const vid = document.createElement('video');
+        vid.src = videoUrl;
+        vid.muted = false;
+        await new Promise((res, rej) => {
+            vid.onloadedmetadata = res;
+            vid.onerror = rej;
+            vid.load();
+        });
+
+        const duration = vid.duration;
+        const W = vid.videoWidth || 1280;
+        const H = vid.videoHeight || 720;
+        const fps = 30;
+
+        // AudioContext aufbauen
+        const actx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioAb = await audioFile.arrayBuffer();
+        const audioBuffer = await actx.decodeAudioData(audioAb);
+
+        // Lautstärke + Fade
+        const gainNode = actx.createGain();
+        gainNode.gain.setValueAtTime(0, 0);
+        gainNode.gain.linearRampToValueAtTime(0.6, 1);           // Fade-in 1s
+        gainNode.gain.setValueAtTime(0.6, Math.max(0, duration - 2));
+        gainNode.gain.linearRampToValueAtTime(0, duration);      // Fade-out 2s
+
+        const dest = actx.createMediaStreamDestination();
+        gainNode.connect(dest);
+
+        // Canvas + Recorder
+        const rc = document.createElement('canvas');
+        rc.width = W; rc.height = H;
+        const rctx = rc.getContext('2d');
+
+        const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
+            ? 'video/webm;codecs=vp9,opus'
+            : MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+                ? 'video/webm;codecs=vp8,opus' : 'video/webm';
+
+        const combinedStream = new MediaStream([
+            ...rc.captureStream(fps).getVideoTracks(),
+            ...dest.stream.getAudioTracks()
+        ]);
+
+        const recorder = new MediaRecorder(combinedStream, { mimeType, videoBitsPerSecond: 8_000_000 });
+        const chunks = [];
+        recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+        const result = await new Promise((resolve) => {
+            recorder.onstop = async () => {
+                URL.revokeObjectURL(videoUrl);
+                actx.close();
+                vid.remove(); rc.remove();
+                const blob = new Blob(chunks, { type: mimeType });
+                resolve(new Uint8Array(await blob.arrayBuffer()));
+            };
+
+            // Musik-Source starten
+            const src = actx.createBufferSource();
+            src.buffer = audioBuffer;
+            src.connect(gainNode);
+
+            recorder.start(100);
+            src.start(0);
+            vid.play();
+
+            let startTs = null;
+            const draw = (ts) => {
+                if (!startTs) startTs = ts;
+                const elapsed = ts - startTs;
+                rctx.drawImage(vid, 0, 0, W, H);
+                if (elapsed < duration * 1000 && !vid.ended) {
+                    if (Math.round(elapsed / 500) % 2 === 0)
+                        onProgress('Musik mischen: ' + Math.min(100, Math.round(elapsed / (duration * 1000) * 100)) + '%');
+                    requestAnimationFrame(draw);
+                } else {
+                    if (recorder.state === 'recording') recorder.stop();
+                    src.stop();
+                }
+            };
+            vid.onended = () => { if (recorder.state === 'recording') recorder.stop(); };
+            requestAnimationFrame(draw);
+        });
+
+        return result;
+    } catch(e) {
+        console.error('mixAudioIntoWebm fehlgeschlagen:', e);
+        return null;
+    }
+}
+
+// Musik in Original-Video-Datei mischen (Video-Datei als Input)
+async function mixAudioIntoVideo(videoFile, audioFile, onProgress) {
+    try {
+        const videoUrl = URL.createObjectURL(videoFile);
+        const vid = document.createElement('video');
+        vid.src = videoUrl;
+        await new Promise((res, rej) => { vid.onloadedmetadata = res; vid.onerror = rej; vid.load(); });
+
+        const duration = vid.duration;
+        const W = vid.videoWidth || 1280;
+        const H = vid.videoHeight || 720;
+        const fps = 30;
+
+        const actx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioAb = await audioFile.arrayBuffer();
+        const audioBuffer = await actx.decodeAudioData(audioAb);
+
+        const gainNode = actx.createGain();
+        gainNode.gain.setValueAtTime(0, 0);
+        gainNode.gain.linearRampToValueAtTime(0.6, 1);
+        gainNode.gain.setValueAtTime(0.6, Math.max(0, duration - 2));
+        gainNode.gain.linearRampToValueAtTime(0, duration);
+
+        const dest = actx.createMediaStreamDestination();
+        gainNode.connect(dest);
+
+        const rc = document.createElement('canvas');
+        rc.width = W; rc.height = H;
+        const rctx = rc.getContext('2d');
+
+        const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
+            ? 'video/webm;codecs=vp9,opus'
+            : MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+                ? 'video/webm;codecs=vp8,opus' : 'video/webm';
+
+        const combinedStream = new MediaStream([
+            ...rc.captureStream(fps).getVideoTracks(),
+            ...dest.stream.getAudioTracks()
+        ]);
+
+        const recorder = new MediaRecorder(combinedStream, { mimeType, videoBitsPerSecond: 8_000_000 });
+        const chunks = [];
+        recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+        const result = await new Promise((resolve) => {
+            recorder.onstop = async () => {
+                URL.revokeObjectURL(videoUrl);
+                actx.close();
+                vid.remove(); rc.remove();
+                const blob = new Blob(chunks, { type: mimeType });
+                resolve(new Uint8Array(await blob.arrayBuffer()));
+            };
+
+            const src = actx.createBufferSource();
+            src.buffer = audioBuffer;
+            src.connect(gainNode);
+
+            vid.muted = true; // Original-Ton stumm
+            recorder.start(100);
+            src.start(0);
+            vid.play();
+
+            let startTs = null;
+            const draw = (ts) => {
+                if (!startTs) startTs = ts;
+                const elapsed = ts - startTs;
+                rctx.drawImage(vid, 0, 0, W, H);
+                if (elapsed < duration * 1000 && !vid.ended) {
+                    if (Math.round(elapsed / 500) % 2 === 0)
+                        onProgress('Musik mischen: ' + Math.min(100, Math.round(elapsed / (duration * 1000) * 100)) + '%');
+                    requestAnimationFrame(draw);
+                } else {
+                    if (recorder.state === 'recording') recorder.stop();
+                    src.stop();
+                }
+            };
+            vid.onended = () => { if (recorder.state === 'recording') recorder.stop(); };
+            requestAnimationFrame(draw);
+        });
+
+        return result;
+    } catch(e) {
+        console.error('mixAudioIntoVideo fehlgeschlagen:', e);
+        return null;
+    }
+}
+
 // Clip umkehren via Canvas – alle Frames sammeln, dann rückwärts abspielen und aufnehmen
 function reverseClipBrowser(file, onProgress) {
     return new Promise((resolve) => {
@@ -830,6 +1165,203 @@ function reverseClipBrowser(file, onProgress) {
         video.src = url;
         video.load();
     });
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUDIO MIXING – MP3 in Video mischen (Web Audio API)
+// Funktioniert in Chrome, Firefox, Safari, iOS Safari
+// ═══════════════════════════════════════════════════════════
+
+// Hilfsfunktion: AudioBuffer aus File dekodieren
+async function decodeAudioFile(file) {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ab = await file.arrayBuffer();
+    return { ctx, buffer: await ctx.decodeAudioData(ab) };
+}
+
+// Musik in ein bereits erzeugtes WebM (Uint8Array, kein Audio) mischen
+// Gibt neues WebM mit Audio-Track zurück
+async function mixAudioIntoWebm(videoData, audioFile, onProgress) {
+    try {
+        // Video als Blob → MediaElement → Video-Stream
+        const videBlob = new Blob([videoData], { type: 'video/webm' });
+        const videoUrl = URL.createObjectURL(videBlob);
+        const vid = document.createElement('video');
+        vid.src = videoUrl;
+        vid.muted = false;
+        await new Promise((res, rej) => {
+            vid.onloadedmetadata = res;
+            vid.onerror = rej;
+            vid.load();
+        });
+
+        const duration = vid.duration;
+        const W = vid.videoWidth || 1280;
+        const H = vid.videoHeight || 720;
+        const fps = 30;
+
+        // AudioContext aufbauen
+        const actx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioAb = await audioFile.arrayBuffer();
+        const audioBuffer = await actx.decodeAudioData(audioAb);
+
+        // Lautstärke + Fade
+        const gainNode = actx.createGain();
+        gainNode.gain.setValueAtTime(0, 0);
+        gainNode.gain.linearRampToValueAtTime(0.6, 1);           // Fade-in 1s
+        gainNode.gain.setValueAtTime(0.6, Math.max(0, duration - 2));
+        gainNode.gain.linearRampToValueAtTime(0, duration);      // Fade-out 2s
+
+        const dest = actx.createMediaStreamDestination();
+        gainNode.connect(dest);
+
+        // Canvas + Recorder
+        const rc = document.createElement('canvas');
+        rc.width = W; rc.height = H;
+        const rctx = rc.getContext('2d');
+
+        const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
+            ? 'video/webm;codecs=vp9,opus'
+            : MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+                ? 'video/webm;codecs=vp8,opus' : 'video/webm';
+
+        const combinedStream = new MediaStream([
+            ...rc.captureStream(fps).getVideoTracks(),
+            ...dest.stream.getAudioTracks()
+        ]);
+
+        const recorder = new MediaRecorder(combinedStream, { mimeType, videoBitsPerSecond: 8_000_000 });
+        const chunks = [];
+        recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+        const result = await new Promise((resolve) => {
+            recorder.onstop = async () => {
+                URL.revokeObjectURL(videoUrl);
+                actx.close();
+                vid.remove(); rc.remove();
+                const blob = new Blob(chunks, { type: mimeType });
+                resolve(new Uint8Array(await blob.arrayBuffer()));
+            };
+
+            // Musik-Source starten
+            const src = actx.createBufferSource();
+            src.buffer = audioBuffer;
+            src.connect(gainNode);
+
+            recorder.start(100);
+            src.start(0);
+            vid.play();
+
+            let startTs = null;
+            const draw = (ts) => {
+                if (!startTs) startTs = ts;
+                const elapsed = ts - startTs;
+                rctx.drawImage(vid, 0, 0, W, H);
+                if (elapsed < duration * 1000 && !vid.ended) {
+                    if (Math.round(elapsed / 500) % 2 === 0)
+                        onProgress('Musik mischen: ' + Math.min(100, Math.round(elapsed / (duration * 1000) * 100)) + '%');
+                    requestAnimationFrame(draw);
+                } else {
+                    if (recorder.state === 'recording') recorder.stop();
+                    src.stop();
+                }
+            };
+            vid.onended = () => { if (recorder.state === 'recording') recorder.stop(); };
+            requestAnimationFrame(draw);
+        });
+
+        return result;
+    } catch(e) {
+        console.error('mixAudioIntoWebm fehlgeschlagen:', e);
+        return null;
+    }
+}
+
+// Musik in Original-Video-Datei mischen (Video-Datei als Input)
+async function mixAudioIntoVideo(videoFile, audioFile, onProgress) {
+    try {
+        const videoUrl = URL.createObjectURL(videoFile);
+        const vid = document.createElement('video');
+        vid.src = videoUrl;
+        await new Promise((res, rej) => { vid.onloadedmetadata = res; vid.onerror = rej; vid.load(); });
+
+        const duration = vid.duration;
+        const W = vid.videoWidth || 1280;
+        const H = vid.videoHeight || 720;
+        const fps = 30;
+
+        const actx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioAb = await audioFile.arrayBuffer();
+        const audioBuffer = await actx.decodeAudioData(audioAb);
+
+        const gainNode = actx.createGain();
+        gainNode.gain.setValueAtTime(0, 0);
+        gainNode.gain.linearRampToValueAtTime(0.6, 1);
+        gainNode.gain.setValueAtTime(0.6, Math.max(0, duration - 2));
+        gainNode.gain.linearRampToValueAtTime(0, duration);
+
+        const dest = actx.createMediaStreamDestination();
+        gainNode.connect(dest);
+
+        const rc = document.createElement('canvas');
+        rc.width = W; rc.height = H;
+        const rctx = rc.getContext('2d');
+
+        const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
+            ? 'video/webm;codecs=vp9,opus'
+            : MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+                ? 'video/webm;codecs=vp8,opus' : 'video/webm';
+
+        const combinedStream = new MediaStream([
+            ...rc.captureStream(fps).getVideoTracks(),
+            ...dest.stream.getAudioTracks()
+        ]);
+
+        const recorder = new MediaRecorder(combinedStream, { mimeType, videoBitsPerSecond: 8_000_000 });
+        const chunks = [];
+        recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+        const result = await new Promise((resolve) => {
+            recorder.onstop = async () => {
+                URL.revokeObjectURL(videoUrl);
+                actx.close();
+                vid.remove(); rc.remove();
+                const blob = new Blob(chunks, { type: mimeType });
+                resolve(new Uint8Array(await blob.arrayBuffer()));
+            };
+
+            const src = actx.createBufferSource();
+            src.buffer = audioBuffer;
+            src.connect(gainNode);
+
+            vid.muted = true; // Original-Ton stumm
+            recorder.start(100);
+            src.start(0);
+            vid.play();
+
+            let startTs = null;
+            const draw = (ts) => {
+                if (!startTs) startTs = ts;
+                const elapsed = ts - startTs;
+                rctx.drawImage(vid, 0, 0, W, H);
+                if (elapsed < duration * 1000 && !vid.ended) {
+                    if (Math.round(elapsed / 500) % 2 === 0)
+                        onProgress('Musik mischen: ' + Math.min(100, Math.round(elapsed / (duration * 1000) * 100)) + '%');
+                    requestAnimationFrame(draw);
+                } else {
+                    if (recorder.state === 'recording') recorder.stop();
+                    src.stop();
+                }
+            };
+            vid.onended = () => { if (recorder.state === 'recording') recorder.stop(); };
+            requestAnimationFrame(draw);
+        });
+
+        return result;
+    } catch(e) {
+        console.error('mixAudioIntoVideo fehlgeschlagen:', e);
+        return null;
+    }
 }
 
 // Clip umkehren via Canvas – alle Frames sammeln, dann rückwärts abspielen und aufnehmen
