@@ -522,9 +522,12 @@ pause
 // ═══════════════════════════════════════════════════════════
 // App
 // ═══════════════════════════════════════════════════════════
-let videoFiles = [];
-let interval   = 5;
-let zipBlob    = null;
+let videoFiles   = [];
+let interval     = 5;
+let zipBlob      = null;
+let musicFile    = null;
+let previewAudio = null;
+let previewVideo = null;
 
 const includeClipToggle  = document.getElementById('includeClipToggle');
 const trimBrowserToggle  = document.getElementById('trimBrowserToggle');
@@ -584,6 +587,67 @@ uploadArea.addEventListener('drop', e => {
     e.preventDefault(); uploadArea.classList.remove('drag');
     addFiles([...e.dataTransfer.files].filter(f => f.type.startsWith('video/')));
 });
+
+// Musik-Upload
+const musicUploadArea = document.getElementById('musicUploadArea');
+const musicInput      = document.getElementById('musicInput');
+const musicPanel      = document.getElementById('musicPanel');
+const musicName       = document.getElementById('musicName');
+const musicSize       = document.getElementById('musicSize');
+const musicPreview    = document.getElementById('musicPreview');
+
+musicInput.addEventListener('change', e => setMusicFile(e.target.files[0]));
+musicUploadArea.addEventListener('dragover', e => { e.preventDefault(); musicUploadArea.classList.add('drag'); });
+musicUploadArea.addEventListener('dragleave', () => musicUploadArea.classList.remove('drag'));
+musicUploadArea.addEventListener('drop', e => {
+    e.preventDefault(); musicUploadArea.classList.remove('drag');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('audio/')) setMusicFile(f);
+});
+
+function setMusicFile(f) {
+    if (!f) return;
+    musicFile = f;
+    musicName.textContent = f.name;
+    musicSize.textContent = (f.size / 1048576).toFixed(1) + ' MB';
+    musicUploadArea.querySelector('.title').textContent = f.name;
+    musicUploadArea.querySelector('.hint').textContent = (f.size / 1048576).toFixed(1) + ' MB \u00b7 Fade-in 1s \u00b7 Fade-out 2s \u00b7 60%';
+    musicUploadArea.querySelector('.icon').textContent = '\u2705';
+    musicPanel.classList.add('show');
+    if (videoFiles.length > 0) musicPreview.style.display = 'flex';
+}
+
+document.getElementById('musicRemove').addEventListener('click', () => {
+    stopPreview();
+    musicFile = null;
+    musicPanel.classList.remove('show');
+    musicUploadArea.querySelector('.title').textContent = 'Musik (optional)';
+    musicUploadArea.querySelector('.hint').textContent = 'MP3, AAC, WAV \u00b7 Fade-in 1s \u00b7 Fade-out 2s \u00b7 60%';
+    musicUploadArea.querySelector('.icon').textContent = '\uD83C\uDFB5';
+    musicInput.value = '';
+});
+
+document.getElementById('previewBtn').addEventListener('click', () => {
+    if (previewAudio) { stopPreview(); return; }
+    if (!musicFile || !videoFiles.length) return;
+    previewVideo = document.createElement('video');
+    previewVideo.src = URL.createObjectURL(videoFiles[0].file);
+    previewVideo.volume = 0;
+    previewVideo.play();
+    previewAudio = new Audio(URL.createObjectURL(musicFile));
+    previewAudio.volume = 0.6;
+    previewAudio.play();
+    previewAudio.onended = stopPreview;
+    previewVideo.onended = stopPreview;
+    document.getElementById('previewBtn').textContent = '\u23F9 Stoppen';
+});
+
+function stopPreview() {
+    if (previewAudio) { previewAudio.pause(); previewAudio = null; }
+    if (previewVideo) { previewVideo.pause(); previewVideo = null; }
+    const btn = document.getElementById('previewBtn');
+    if (btn) btn.textContent = '\u25B6 Vorschau abspielen';
+}
 
 function addFiles(files) {
     const room = 10 - videoFiles.length;
